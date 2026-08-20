@@ -1,0 +1,2875 @@
+diff --git a/README.md b/README.md
+index 93349ac..8abde89 100755
+--- a/README.md
++++ b/README.md
+@@ -1,17 +1,17 @@
+-# FastAPI Example App
++# Flask Example App
+ 
+-![fastapi-0.135.3](https://img.shields.io/badge/fastapi-0.135.3-009688?logo=fastapi&logoColor=white) ![python-3.13](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white) [![CodeQL](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml) [![Docker Compose Actions Workflow](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml)
++![flask-3.1.2](https://img.shields.io/badge/flask-3.1.2-000000?logo=flask&logoColor=white) ![python-3.13](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white) [![CodeQL](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml) [![Docker Compose Actions Workflow](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml)
+ 
+ [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kenmwaura1)
+ [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label=Follow&on)](https://twitter.com/Ken_Mwaura1)
+ 
+-A production-ready asynchronous REST API built with [FastAPI](https://fastapi.tiangolo.com/), featuring secure user authentication and advanced notes management. The application uses modern patterns like native SQLAlchemy 2.0 Async, Pydantic 2 settings, and is fully containerized.
++A production-ready REST API built with [Flask](https://flask.palletsprojects.com/), featuring secure user authentication and advanced notes management. The application uses modern patterns like SQLAlchemy 2.0, Pydantic 2 settings and validation, and is fully containerized.
+ 
+ ## ✨ Features
+ 
+-- 🚀 **Asynchronous API** - Built with FastAPI 0.135.3 and async/await patterns
++- 🚀 **REST API** - Built with Flask 3.1.2 and blueprint-based routing
+ - 🔐 **Secure Authentication** - JWT-based OAuth2 Password Grant flow
+-- 🐘 **PostgreSQL Database** - Native SQLAlchemy 2.0 Async with asyncpg
++- 🐘 **PostgreSQL Database** - SQLAlchemy 2.0 Core with psycopg2
+ - 📦 **Database Migrations** - Managed by Alembic
+ - 🔍 **Search & Filter** - Support for text search, completion status, and tags
+ - 🏷️ **Tags Support** - Organize notes with flexible tagging
+@@ -105,7 +105,7 @@ This `docker build` command sets the build context to `src` so the `COPY require
+    Configure your DATABASE_URL in `src/.env` (copy from `src/app/.env-example`):
+ 
+    ```env
+-   DATABASE_URL=postgresql+asyncpg://user:password@localhost/dbname
++   DATABASE_URL=postgresql://user:password@localhost/dbname
+    SECRET_KEY=your-secret-key
+    ```
+ 
+@@ -185,7 +185,7 @@ Fast-Api-example/
+ │   │   │   └── models.py # Pydantic models
+ │   │   ├── config.py     # Pydantic Settings
+ │   │   ├── db.py         # SQLAlchemy Setup
+-│   │   └── main.py       # FastAPI Entry
++│   │   └── main.py       # Flask Entry
+ │   ├── migrations/       # Alembic migrations
+ │   └── tests/            # Test suite
+ ├── vue-client/           # Vue 3 frontend
+@@ -200,7 +200,7 @@ If you see "relation 'notes' already exists", ensure you have run `alembic upgra
+ 
+ ### Connection Refused
+ 
+-If the backend can't connect to the DB in Docker, verify the `DATABASE_URL` uses `db` as the hostname: `postgresql+asyncpg://user:pass@db/dbname`.
++If the backend can't connect to the DB in Docker, verify the `DATABASE_URL` uses `db` as the hostname: `postgresql://user:pass@db/dbname`.
+ 
+ ### Frontend API URL
+ 
+@@ -218,4 +218,4 @@ This project is licensed under the [MIT License](LICENSE).
+ - GitHub: [@KenMwaura1](https://github.com/KenMwaura1)
+ 
+ ---
+-**Built with ❤️ using FastAPI and Vue.js**
++**Built with ❤️ using Flask and Vue.js**
+diff --git a/docs/CONTRIBUTING.md b/docs/CONTRIBUTING.md
+index e8af1ac..784974a 100644
+--- a/docs/CONTRIBUTING.md
++++ b/docs/CONTRIBUTING.md
+@@ -31,7 +31,7 @@ Steps to reproduce:
+ Expected: Note should be created successfully
+ Actual: 500 Error returned
+ 
+-Environment: Python 3.13, PostgreSQL 14, FastAPI 0.115.8
++Environment: Python 3.13, PostgreSQL 14, Flask 3.1.2
+ ```
+ 
+ ### Suggesting Enhancements
+diff --git a/docs/QUICK_REFERENCE.md b/docs/QUICK_REFERENCE.md
+index 6eb35da..6dfd3a5 100644
+--- a/docs/QUICK_REFERENCE.md
++++ b/docs/QUICK_REFERENCE.md
+@@ -189,7 +189,7 @@ mypy src/app
+ ```
+ src/
+ ├── app/
+-│   ├── main.py           # FastAPI app
++│   ├── main.py           # Flask app
+ │   ├── db.py             # Database config
+ │   ├── .env-example      # Env template
+ │   └── api/
+@@ -223,7 +223,7 @@ ALLOWED_ORIGINS=http://localhost,http://localhost:5173
+ 
+ | File | Purpose |
+ |------|---------|
+-| `src/app/main.py` | FastAPI app initialization |
++| `src/app/main.py` | Flask app initialization |
+ | `src/app/db.py` | Database config & schema |
+ | `src/app/api/models.py` | Data models & validation |
+ | `src/app/api/crud.py` | Database operations |
+@@ -305,7 +305,7 @@ docker-compose exec db psql -U hello_fastapi -d fast_api_dev
+ - [API Documentation](API.md)
+ - [Development Guide](DEVELOPMENT.md)
+ - [Contributing Guide](CONTRIBUTING.md)
+-- [FastAPI Docs](https://fastapi.tiangolo.com/)
++- [Flask Docs](https://flask.palletsprojects.com/)
+ - [Pydantic Docs](https://docs.pydantic.dev/)
+ - [SQLAlchemy Docs](https://docs.sqlalchemy.org/)
+ - [PostgreSQL Docs](https://www.postgresql.org/docs/)
+@@ -314,8 +314,8 @@ docker-compose exec db psql -U hello_fastapi -d fast_api_dev
+ 
+ | Service | Port | URL |
+ |---------|------|-----|
+-| FastAPI | 8000 | http://localhost:8000 |
+-| FastAPI (Docker) | 8002 | http://localhost:8002 |
++| Flask | 8000 | http://localhost:8000 |
++| Flask (Docker) | 8002 | http://localhost:8002 |
+ | PostgreSQL | 5432 | localhost:5432 |
+ | Vue Frontend | 5173 | http://localhost:5173 |
+ 
+diff --git a/index.html b/index.html
+index 3e26373..16938b7 100644
+--- a/index.html
++++ b/index.html
+@@ -3,8 +3,8 @@
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    <meta name="description" content="FastAPI Notes API - A production-ready asynchronous REST API for notes management">
+-    <title>FastAPI Notes API - Documentation</title>
++    <meta name="description" content="Flask Notes API - A production-ready REST API for notes management">
++    <title>Flask Notes API - Documentation</title>
+     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grad)' rx='20'/%3E%3Ctext x='50' y='70' font-family='Arial, sans-serif' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+     <style>
+         * {
+@@ -173,10 +173,10 @@
+ <body>
+     <div class="container">
+         <header>
+-            <h1>🚀 FastAPI Notes API</h1>
+-            <p>A production-ready asynchronous REST API built with FastAPI</p>
++            <h1>🚀 Flask Notes API</h1>
++            <p>A production-ready REST API built with Flask</p>
+             <div class="badges">
+-                <img src="https://img.shields.io/badge/fastapi-0.115.8-009688?logo=fastapi&logoColor=white" alt="FastAPI">
++                <img src="https://img.shields.io/badge/flask-3.1.2-000000?logo=flask&logoColor=white" alt="Flask">
+                 <img src="https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white" alt="Python">
+                 <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
+             </div>
+@@ -200,11 +200,11 @@
+                 <div class="features">
+                     <div class="feature-card">
+                         <h3>🚀 Async API</h3>
+-                        <p>Built with FastAPI and async/await patterns for high performance</p>
++                        <p>Built with Flask and blueprint-based routing</p>
+                     </div>
+                     <div class="feature-card">
+                         <h3>🐘 PostgreSQL</h3>
+-                        <p>Production-grade database with asyncpg driver</p>
++                        <p>Production-grade database with psycopg2 driver</p>
+                     </div>
+                     <div class="feature-card">
+                         <h3>🔍 Search & Filter</h3>
+@@ -276,11 +276,11 @@ docker-compose up -d --build
+             <div class="section">
+                 <h2>🛠️ Tech Stack</h2>
+                 <ul style="list-style: none; padding: 20px;">
+-                    <li style="margin: 8px 0;"><strong>Framework:</strong> FastAPI 0.115.8</li>
++                    <li style="margin: 8px 0;"><strong>Framework:</strong> Flask 3.1.2</li>
+                     <li style="margin: 8px 0;"><strong>Python:</strong> 3.13</li>
+-                    <li style="margin: 8px 0;"><strong>Database:</strong> PostgreSQL with asyncpg</li>
++                    <li style="margin: 8px 0;"><strong>Database:</strong> PostgreSQL with psycopg2</li>
+                     <li style="margin: 8px 0;"><strong>ORM:</strong> SQLAlchemy 1.4.50</li>
+-                    <li style="margin: 8px 0;"><strong>Server:</strong> Uvicorn with uvloop</li>
++                    <li style="margin: 8px 0;"><strong>Server:</strong> Gunicorn (WSGI)</li>
+                     <li style="margin: 8px 0;"><strong>Testing:</strong> pytest 7.4.3</li>
+                     <li style="margin: 8px 0;"><strong>Frontend:</strong> Vue 3 + Vite</li>
+                 </ul>
+@@ -307,7 +307,7 @@ git push origin feature/amazing-feature</code></pre>
+                 <h2>📖 Resources</h2>
+                 <ul style="padding: 20px;">
+                     <li><a href="https://dev.to/ken_mwaura1/getting-started-with-fast-api-and-docker-515" style="color: #009688;">Official Tutorial</a> - Complete step-by-step guide</li>
+-                    <li><a href="https://fastapi.tiangolo.com/" style="color: #009688;">FastAPI Documentation</a></li>
++                    <li><a href="https://flask.palletsprojects.com/" style="color: #009688;">Flask Documentation</a></li>
+                     <li><a href="https://docs.docker.com/" style="color: #009688;">Docker Documentation</a></li>
+                     <li><a href="https://www.postgresql.org/docs/" style="color: #009688;">PostgreSQL Documentation</a></li>
+                 </ul>
+@@ -320,7 +320,7 @@ git push origin feature/amazing-feature</code></pre>
+                 <a href="https://twitter.com/Ken_Mwaura1" target="_blank">Twitter</a> | 
+                 <a href="https://github.com/KenMwaura1" target="_blank">GitHub</a>
+             </p>
+-            <p style="margin-top: 15px; opacity: 0.8;">Built with ❤️ using FastAPI</p>
++            <p style="margin-top: 15px; opacity: 0.8;">Built with ❤️ using Flask</p>
+             <p style="margin-top: 5px; font-size: 0.9em; opacity: 0.6;">Licensed under MIT</p>
+         </footer>
+     </div>
+diff --git a/run.sh b/run.sh
+index e50eea3..a948430 100755
+--- a/run.sh
++++ b/run.sh
+@@ -14,7 +14,8 @@ PORT=${PORT:-8000}
+   fi
+ 
+   # Run app with auto-reload for development
+-  echo "Starting FastAPI application on http://$HOST:$PORT"
++  echo "Starting Flask application on http://$HOST:$PORT"
+   echo "API docs available at http://$HOST:$PORT/docs"
+-  uvicorn --reload --host "$HOST" --port "$PORT" "$APP_MODULE"
+-)
+\ No newline at end of file
++  export FLASK_APP="$APP_MODULE"
++  flask --app "$APP_MODULE" run --host "$HOST" --port "$PORT" --reload
++)
+diff --git a/src/Dockerfile b/src/Dockerfile
+index 70ec4af..8f82d84 100755
+--- a/src/Dockerfile
++++ b/src/Dockerfile
+@@ -67,4 +67,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+ EXPOSE 8000
+ 
+ # Run application
+-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
++CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "60", "app.main:app"]
+diff --git a/src/app/.env-example b/src/app/.env-example
+index 6c0a7d9..88ceefc 100755
+--- a/src/app/.env-example
++++ b/src/app/.env-example
+@@ -1,7 +1,7 @@
+ # Database Configuration
+-# PostgreSQL connection string (use postgresql+asyncpg for async support)
+-# Format: postgresql+asyncpg://username:password@host:port/database_name
+-DATABASE_URL=postgresql+asyncpg://hello_fastapi:hello_fastapi@localhost/hello_fastapi_dev
++# PostgreSQL connection string (psycopg2 driver; the app is synchronous)
++# Format: postgresql://username:password@host:port/database_name
++DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@localhost/hello_fastapi_dev
+ 
+ # JWT Security
+ # Run 'openssl rand -hex 32' to generate a strong secret key
+diff --git a/src/app/api/auth.py b/src/app/api/auth.py
+index ce2479b..8e9e11c 100644
+--- a/src/app/api/auth.py
++++ b/src/app/api/auth.py
+@@ -1,60 +1,62 @@
+-from fastapi import APIRouter, Depends, HTTPException, status
+-from fastapi.security import OAuth2PasswordRequestForm
+-from sqlalchemy.ext.asyncio import AsyncSession
+ from datetime import timedelta
+ 
++from flask import Blueprint, jsonify
++
+ from app.api import crud, security
+-from app.api.models import UserCreate, UserDB, Token, ErrorResponse
++from app.api.errors import HTTPExc
++from app.api.models import UserCreate, UserDB, Token
++from app.api.validation import validate_body, validate_login_form
+ from app.db import get_db
+ from app.config import get_settings
+ 
+-router = APIRouter()
++bp = Blueprint("auth", __name__)
+ settings = get_settings()
+ 
+ 
+-@router.post(
+-    "/register",
+-    response_model=UserDB,
+-    status_code=201,
+-    responses={400: {"model": ErrorResponse}},
+-)
+-async def register(payload: UserCreate, session: AsyncSession = Depends(get_db)):
++@bp.post("/register")
++def register():
+     """Register a new user"""
++    payload = validate_body(UserCreate)
++    session = get_db()
++
+     # Check if username already exists
+-    user = await crud.get_user_by_username(session, payload.username)
++    user = crud.get_user_by_username(session, payload.username)
+     if user:
+-        raise HTTPException(status_code=400, detail="Username already registered")
++        raise HTTPExc(400, "Username already registered")
+ 
+     # Check if email already exists
+-    user = await crud.get_user_by_email(session, payload.email)
++    user = crud.get_user_by_email(session, payload.email)
+     if user:
+-        raise HTTPException(status_code=400, detail="Email already registered")
++        raise HTTPExc(400, "Email already registered")
+ 
+     hashed_password = security.get_password_hash(payload.password)
+-    await crud.create_user(session, payload, hashed_password)
++    crud.create_user(session, payload, hashed_password)
+ 
+     # Return user data (without password)
+-    return await crud.get_user_by_username(session, payload.username)
++    created = crud.get_user_by_username(session, payload.username)
++    response = jsonify(UserDB(**created).model_dump(mode="json"))
++    response.status_code = 201
++    return response
+ 
+ 
+-@router.post("/token", response_model=Token)
+-async def login_for_access_token(
+-    form_data: OAuth2PasswordRequestForm = Depends(),
+-    session: AsyncSession = Depends(get_db),
+-):
++@bp.post("/token")
++def login_for_access_token():
+     """Login to get access token"""
+-    user = await crud.get_user_by_username(session, form_data.username)
+-    if not user or not security.verify_password(
+-        form_data.password, user["hashed_password"]
+-    ):
+-        raise HTTPException(
+-            status_code=status.HTTP_401_UNAUTHORIZED,
+-            detail="Incorrect username or password",
+-            headers={"WWW-Authenticate": "Bearer"},
++    username, password = validate_login_form()
++    session = get_db()
++
++    user = crud.get_user_by_username(session, username)
++    if not user or not security.verify_password(password, user["hashed_password"]):
++        raise HTTPExc(
++            401,
++            "Incorrect username or password",
++            {"WWW-Authenticate": "Bearer"},
+         )
+ 
+     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+     access_token = security.create_access_token(
+         data={"sub": user["username"]}, expires_delta=access_token_expires
+     )
+-    return {"access_token": access_token, "token_type": "bearer"}
++    return jsonify(
++        Token(access_token=access_token, token_type="bearer").model_dump(mode="json")
++    )
+diff --git a/src/app/api/cors.py b/src/app/api/cors.py
+new file mode 100644
+index 0000000..8d70207
+--- /dev/null
++++ b/src/app/api/cors.py
+@@ -0,0 +1,53 @@
++"""CORS handling equivalent to Starlette's ``CORSMiddleware``.
++
++flask-cors does not reproduce Starlette's exact header set, so the behaviour the
++FastAPI app exhibited is implemented directly:
++
++* preflight (OPTIONS + Origin + Access-Control-Request-Method) -> 200 with
++  Allow-Origin / Allow-Methods / Allow-Headers / Allow-Credentials,
++* simple request carrying an Origin -> Allow-Credentials always, Allow-Origin
++  only when the origin is in the configured allowlist,
++* OPTIONS/HEAD without CORS intent -> 405, matching Starlette's router.
++"""
++
++from flask import request
++
++# Mirrors app.add_middleware(CORSMiddleware, allow_methods=[...]) ordering.
++ALLOW_METHODS = ["DELETE", "GET", "POST", "PUT"]
++
++
++def init_cors(app, allowed_origins):
++    allowed = [origin.strip() for origin in allowed_origins if origin.strip()]
++
++    def _origin_allowed(origin):
++        return origin in allowed or "*" in allowed
++
++    @app.before_request
++    def _preflight():
++        origin = request.headers.get("Origin")
++        requested_method = request.headers.get("Access-Control-Request-Method")
++        if request.method != "OPTIONS" or not origin or not requested_method:
++            return None
++        response = app.make_response("OK")
++        response.headers["Content-Type"] = "text/plain; charset=utf-8"
++        response.headers["Access-Control-Allow-Methods"] = ", ".join(ALLOW_METHODS)
++        response.headers["Access-Control-Max-Age"] = "600"
++        response.headers["Access-Control-Allow-Credentials"] = "true"
++        requested_headers = request.headers.get("Access-Control-Request-Headers")
++        if requested_headers:
++            response.headers["Access-Control-Allow-Headers"] = requested_headers
++        response.headers["Vary"] = "Origin"
++        if _origin_allowed(origin):
++            response.headers["Access-Control-Allow-Origin"] = origin
++        return response
++
++    @app.after_request
++    def _simple(response):
++        origin = request.headers.get("Origin")
++        if not origin:
++            return response
++        response.headers.setdefault("Access-Control-Allow-Credentials", "true")
++        if _origin_allowed(origin):
++            response.headers.setdefault("Access-Control-Allow-Origin", origin)
++            response.headers.setdefault("Vary", "Origin")
++        return response
+diff --git a/src/app/api/crud.py b/src/app/api/crud.py
+index ee2190f..d79b779 100755
+--- a/src/app/api/crud.py
++++ b/src/app/api/crud.py
+@@ -2,16 +2,21 @@ from app.api.models import NoteSchema, UserCreate
+ from app.db import notes, users
+ from sqlalchemy import select, insert, update, or_, and_
+ import sqlalchemy as sa
+-from sqlalchemy.ext.asyncio import AsyncSession
++from sqlalchemy.orm import Session
+ from typing import Optional, List, Dict, Any
+ 
+ 
++def result_scalar(result):
++    """Read a RETURNING value and close its cursor so COMMIT can proceed."""
++    value = result.scalar()
++    result.close()
++    return value
++
++
+ # --- User CRUD ---
+ 
+ 
+-async def create_user(
+-    session: AsyncSession, payload: UserCreate, hashed_password: str
+-) -> int:
++def create_user(session: Session, payload: UserCreate, hashed_password: str) -> int:
+     """Create a new user and return its ID"""
+     query = (
+         insert(users)
+@@ -23,27 +28,25 @@ async def create_user(
+         )
+         .returning(users.c.id)
+     )
+-    result = await session.execute(query)
+-    await session.commit()
+-    return result.scalar()
++    # Consume the RETURNING cursor before COMMIT: the sync DBAPI refuses to
++    # commit while statements are still in progress.
++    new_id = result_scalar(session.execute(query))
++    session.commit()
++    return new_id
+ 
+ 
+-async def get_user_by_username(
+-    session: AsyncSession, username: str
+-) -> Optional[Dict[str, Any]]:
++def get_user_by_username(session: Session, username: str) -> Optional[Dict[str, Any]]:
+     """Retrieve a user by username"""
+     query = select(users).where(users.c.username == username)
+-    result = await session.execute(query)
++    result = session.execute(query)
+     row = result.mappings().first()
+     return dict(row) if row else None
+ 
+ 
+-async def get_user_by_email(
+-    session: AsyncSession, email: str
+-) -> Optional[Dict[str, Any]]:
++def get_user_by_email(session: Session, email: str) -> Optional[Dict[str, Any]]:
+     """Retrieve a user by email"""
+     query = select(users).where(users.c.email == email)
+-    result = await session.execute(query)
++    result = session.execute(query)
+     row = result.mappings().first()
+     return dict(row) if row else None
+ 
+@@ -51,7 +54,7 @@ async def get_user_by_email(
+ # --- Note CRUD ---
+ 
+ 
+-async def post(session: AsyncSession, payload: NoteSchema, owner_id: int) -> int:
++def post(session: Session, payload: NoteSchema, owner_id: int) -> int:
+     """Create a new note and return its ID"""
+     query = (
+         insert(notes)
+@@ -65,21 +68,21 @@ async def post(session: AsyncSession, payload: NoteSchema, owner_id: int) -> int
+         )
+         .returning(notes.c.id)
+     )
+-    result = await session.execute(query)
+-    await session.commit()
+-    return result.scalar()
++    new_id = result_scalar(session.execute(query))
++    session.commit()
++    return new_id
+ 
+ 
+-async def get(session: AsyncSession, id: int) -> Optional[Dict[str, Any]]:
++def get(session: Session, id: int) -> Optional[Dict[str, Any]]:
+     """Retrieve a single note by ID"""
+     query = select(notes).where(and_(notes.c.id == id, notes.c.is_deleted.is_(False)))
+-    result = await session.execute(query)
++    result = session.execute(query)
+     row = result.mappings().first()
+     return dict(row) if row else None
+ 
+ 
+-async def get_notes(
+-    session: AsyncSession,
++def get_notes(
++    session: Session,
+     owner_id: int,
+     skip: int = 0,
+     limit: int = 10,
+@@ -122,11 +125,11 @@ async def get_notes(
+     # Apply pagination and ordering
+     query = query.order_by(notes.c.created_date.desc()).offset(skip).limit(limit)
+ 
+-    result = await session.execute(query)
++    result = session.execute(query)
+     return [dict(row) for row in result.mappings().all()]
+ 
+ 
+-async def put(session: AsyncSession, id: int, payload: NoteSchema) -> Optional[int]:
++def put(session: Session, id: int, payload: NoteSchema) -> Optional[int]:
+     """Update a note and return its ID if successful"""
+     query = (
+         update(notes)
+@@ -139,22 +142,26 @@ async def put(session: AsyncSession, id: int, payload: NoteSchema) -> Optional[i
+         )
+         .returning(notes.c.id)
+     )
+-    result = await session.execute(query)
+-    await session.commit()
+-    return result.scalar()
++    updated_id = result_scalar(session.execute(query))
++    session.commit()
++    return updated_id
+ 
+ 
+-async def delete_note(session: AsyncSession, id: int) -> int:
++def delete_note(session: Session, id: int) -> int:
+     """Soft delete a note and return the number of rows affected"""
+-    query = update(notes).where(and_(notes.c.id == id, notes.c.is_deleted.is_(False))).values(is_deleted=True)
+-    result = await session.execute(query)
+-    await session.commit()
+-    return result.rowcount
++    query = (
++        update(notes)
++        .where(and_(notes.c.id == id, notes.c.is_deleted.is_(False)))
++        .values(is_deleted=True)
++    )
++    rowcount = session.execute(query).rowcount
++    session.commit()
++    return rowcount
+ 
+ 
+-async def delete_all(session: AsyncSession, owner_id: int) -> int:
++def delete_all(session: Session, owner_id: int) -> int:
+     """Soft delete all notes for a specific owner and return the count"""
+     query = update(notes).where(notes.c.owner_id == owner_id).values(is_deleted=True)
+-    result = await session.execute(query)
+-    await session.commit()
+-    return result.rowcount
++    rowcount = session.execute(query).rowcount
++    session.commit()
++    return rowcount
+diff --git a/src/app/api/dependencies.py b/src/app/api/dependencies.py
+index 8755776..c969bb3 100644
+--- a/src/app/api/dependencies.py
++++ b/src/app/api/dependencies.py
+@@ -1,46 +1,79 @@
+-from fastapi import Depends, HTTPException, status
+-from fastapi.security import OAuth2PasswordBearer
++from functools import wraps
++
++from flask import g, request
+ from jose import JWTError, jwt
+-from sqlalchemy.ext.asyncio import AsyncSession
+ 
+ from app.api import crud
++from app.api.errors import HTTPExc
+ from app.api.models import TokenData, UserDB
+ from app.db import get_db
+ from app.config import get_settings
+ 
+ settings = get_settings()
+-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
++
++# The FastAPI app declared OAuth2PasswordBearer(tokenUrl="auth/token"); the
++# bearer-token extraction it performed implicitly is done explicitly here.
++TOKEN_URL = "auth/token"
++
++
++def _unauthorized(detail: str) -> HTTPExc:
++    return HTTPExc(401, detail, {"WWW-Authenticate": "Bearer"})
+ 
+ 
+-async def get_current_user(
+-    token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_db)
+-) -> UserDB:
+-    credentials_exception = HTTPException(
+-        status_code=status.HTTP_401_UNAUTHORIZED,
+-        detail="Could not validate credentials",
+-        headers={"WWW-Authenticate": "Bearer"},
+-    )
++def _bearer_token() -> str:
++    """Replicates OAuth2PasswordBearer: missing/!bearer -> 'Not authenticated'."""
++    header = request.headers.get("Authorization")
++    if not header:
++        raise _unauthorized("Not authenticated")
++    scheme, _, token = header.partition(" ")
++    if scheme.lower() != "bearer" or not token:
++        raise _unauthorized("Not authenticated")
++    return token
++
++
++def get_current_user() -> UserDB:
++    token = _bearer_token()
++    credentials_exception = _unauthorized("Could not validate credentials")
+     try:
+         payload = jwt.decode(
+             token, settings.secret_key, algorithms=[settings.algorithm]
+         )
+-        username: str = payload.get("sub")
++        username = payload.get("sub")
+         if username is None:
+             raise credentials_exception
+         token_data = TokenData(username=username)
+     except JWTError:
+         raise credentials_exception
+ 
+-    user = await crud.get_user_by_username(session, username=token_data.username)
++    user = crud.get_user_by_username(get_db(), username=token_data.username)
+     if user is None:
+         raise credentials_exception
+ 
+     return UserDB(**user)
+ 
+ 
+-async def get_current_active_user(
+-    current_user: UserDB = Depends(get_current_user),
+-) -> UserDB:
++def get_current_active_user() -> UserDB:
++    current_user = get_current_user()
+     if not current_user.is_active:
+-        raise HTTPException(status_code=400, detail="Inactive user")
++        raise HTTPExc(400, "Inactive user")
+     return current_user
++
++
++def auth_required(view):
++    """Route decorator replacing ``Depends(get_current_active_user)``.
++
++    FastAPI resolves security dependencies before validating body/path/query
++    parameters, so authentication must run before any 422 can be raised. This
++    decorator wraps the view so that ordering is preserved.
++    """
++
++    @wraps(view)
++    def wrapper(*args, **kwargs):
++        g.current_user = get_current_active_user()
++        return view(*args, **kwargs)
++
++    return wrapper
++
++
++def current_user() -> UserDB:
++    return g.current_user
+diff --git a/src/app/api/errors.py b/src/app/api/errors.py
+new file mode 100644
+index 0000000..496fd03
+--- /dev/null
++++ b/src/app/api/errors.py
+@@ -0,0 +1,67 @@
++"""Error types and handlers that reproduce FastAPI's HTTP error envelopes.
++
++FastAPI serialises ``HTTPException`` as ``{"detail": ...}`` and request
++validation failures as ``{"detail": [ ...pydantic errors... ]}`` with status
++422. Flask has no equivalent, so both shapes are rebuilt here and registered as
++application-wide error handlers.
++"""
++
++from flask import jsonify
++
++
++class HTTPExc(Exception):
++    """Direct replacement for ``fastapi.HTTPException``."""
++
++    def __init__(self, status_code: int, detail, headers: dict | None = None):
++        super().__init__(detail)
++        self.status_code = status_code
++        self.detail = detail
++        self.headers = headers or {}
++
++
++class RequestValidationError(Exception):
++    """Direct replacement for FastAPI's ``RequestValidationError`` (HTTP 422)."""
++
++    def __init__(self, errors: list):
++        super().__init__("validation error")
++        self.errors = errors
++
++
++def _json(payload, status, headers=None):
++    response = jsonify(payload)
++    response.status_code = status
++    for key, value in (headers or {}).items():
++        response.headers[key] = value
++    return response
++
++
++def register_error_handlers(app):
++    @app.errorhandler(HTTPExc)
++    def _http_exc(exc: HTTPExc):
++        return _json({"detail": exc.detail}, exc.status_code, exc.headers)
++
++    @app.errorhandler(RequestValidationError)
++    def _validation_exc(exc: RequestValidationError):
++        return _json({"detail": exc.errors}, 422)
++
++    @app.errorhandler(404)
++    def _not_found(_exc):
++        # Starlette's default 404 body
++        return _json({"detail": "Not Found"}, 404)
++
++    @app.errorhandler(405)
++    def _method_not_allowed(exc):
++        # Starlette's default 405 body; preserve the Allow header Werkzeug computed
++        headers = {}
++        valid = getattr(exc, "valid_methods", None)
++        if valid:
++            # Starlette never registers implicit HEAD/OPTIONS, so they must not
++            # appear in Allow either.
++            explicit = sorted(set(valid) - {"HEAD", "OPTIONS"})
++            if explicit:
++                headers["Allow"] = ", ".join(explicit)
++        return _json({"detail": "Method Not Allowed"}, 405, headers)
++
++    @app.errorhandler(500)
++    def _internal(_exc):
++        return _json({"detail": "Internal Server Error"}, 500)
+diff --git a/src/app/api/notes.py b/src/app/api/notes.py
+index 7248230..b58080e 100755
+--- a/src/app/api/notes.py
++++ b/src/app/api/notes.py
+@@ -1,48 +1,43 @@
++from flask import Blueprint, jsonify
++
+ from app.api import crud
+-from app.api.models import NoteDB, NoteSchema, ErrorResponse, UserDB
+-from app.api.dependencies import get_current_active_user
++from app.api.dependencies import auth_required, current_user
++from app.api.errors import HTTPExc
++from app.api.models import NoteDB, NoteSchema
++from app.api.validation import (
++    collect,
++    validate_body,
++    validate_notes_query,
++    validate_path_id,
++)
+ from app.db import get_db
+-from sqlalchemy.ext.asyncio import AsyncSession
+-from fastapi import APIRouter, HTTPException, Path, Query, Depends
+-from typing import List, Optional
+ 
+-router = APIRouter()
++bp = Blueprint("notes", __name__)
+ 
+ 
+-@router.post(
+-    "/",
+-    response_model=NoteDB,
+-    status_code=201,
+-    responses={400: {"model": ErrorResponse}},
+-)
+-async def create_note(
+-    payload: NoteSchema,
+-    session: AsyncSession = Depends(get_db),
+-    current_user: UserDB = Depends(get_current_active_user),
+-):
++def _serialize(note: dict):
++    return NoteDB(**note).model_dump(mode="json")
++
++
++@bp.post("/")
++@auth_required
++def create_note():
+     """Create a new note"""
++    payload = validate_body(NoteSchema)
++    session = get_db()
+     try:
+-        note_id = await crud.post(session, payload, owner_id=current_user.id)
+-        response = await crud.get(session, note_id)
+-        return response
++        note_id = crud.post(session, payload, owner_id=current_user().id)
++        response = crud.get(session, note_id)
+     except Exception as e:
+-        raise HTTPException(status_code=400, detail=f"Failed to create note: {str(e)}")
++        raise HTTPExc(400, f"Failed to create note: {str(e)}")
++    result = jsonify(_serialize(response))
++    result.status_code = 201
++    return result
+ 
+ 
+-@router.get("/", response_model=List[NoteDB], responses={400: {"model": ErrorResponse}})
+-async def read_notes(
+-    skip: int = Query(0, ge=0, description="Number of items to skip"),
+-    limit: int = Query(
+-        10, ge=1, le=100, description="Maximum number of items to return"
+-    ),
+-    search: Optional[str] = Query(
+-        None, max_length=100, description="Search term for title/description"
+-    ),
+-    completed: Optional[bool] = Query(None, description="Filter by completion status"),
+-    tag: Optional[str] = Query(None, description="Filter by tag"),
+-    session: AsyncSession = Depends(get_db),
+-    current_user: UserDB = Depends(get_current_active_user),
+-):
++@bp.get("/")
++@auth_required
++def read_notes():
+     """
+     Retrieve notes with optional filtering and pagination.
+ 
+@@ -52,89 +47,76 @@ async def read_notes(
+     - **completed**: Filter by completion status (true/false)
+     - **tag**: Filter notes that contain this specific tag
+     """
++    query = validate_notes_query()
++    session = get_db()
+     try:
+-        return await crud.get_notes(
++        rows = crud.get_notes(
+             session,
+-            owner_id=current_user.id,
+-            skip=skip,
+-            limit=limit,
+-            search=search,
+-            completed=completed,
+-            tag=tag,
++            owner_id=current_user().id,
++            skip=query.skip,
++            limit=query.limit,
++            search=query.search,
++            completed=query.completed,
++            tag=query.tag,
+         )
+     except Exception as e:
+-        raise HTTPException(
+-            status_code=400, detail=f"Failed to retrieve notes: {str(e)}"
+-        )
++        raise HTTPExc(400, f"Failed to retrieve notes: {str(e)}")
++    return jsonify([_serialize(row) for row in rows])
+ 
+ 
+-@router.get(
+-    "/{id}",
+-    response_model=NoteDB,
+-    responses={404: {"model": ErrorResponse}, 422: {"description": "Invalid note ID"}},
+-)
+-async def read_note(
+-    id: int = Path(..., gt=0, description="Note ID"),
+-    session: AsyncSession = Depends(get_db),
+-    current_user: UserDB = Depends(get_current_active_user),
+-):
++@bp.get("/<id>")
++@auth_required
++def read_note(id):
+     """Retrieve a specific note by ID"""
++    note_id = validate_path_id(id)
++    session = get_db()
+     try:
+-        note = await crud.get(session, id)
+-        if not note or note["owner_id"] != current_user.id:
+-            raise HTTPException(status_code=404, detail=f"Note with id {id} not found")
+-        return note
+-    except HTTPException:
++        note = crud.get(session, note_id)
++        if not note or note["owner_id"] != current_user().id:
++            raise HTTPExc(404, f"Note with id {note_id} not found")
++        return jsonify(_serialize(note))
++    except HTTPExc:
+         raise
+     except Exception as e:
+-        raise HTTPException(
+-            status_code=400, detail=f"Failed to retrieve note: {str(e)}"
+-        )
++        raise HTTPExc(400, f"Failed to retrieve note: {str(e)}")
+ 
+ 
+-@router.put(
+-    "/{id}",
+-    response_model=NoteDB,
+-    responses={404: {"model": ErrorResponse}, 422: {"description": "Invalid note ID"}},
+-)
+-async def update_note(
+-    id: int = Path(..., gt=0, description="Note ID"),
+-    payload: NoteSchema = None,
+-    session: AsyncSession = Depends(get_db),
+-    current_user: UserDB = Depends(get_current_active_user),
+-):
++@bp.put("/<id>")
++@auth_required
++def update_note(id):
+     """Update an existing note"""
++    # FastAPI reports path and body failures together, so accumulate both.
++    note_id, payload = collect(
++        lambda: validate_path_id(id),
++        lambda: validate_body(NoteSchema),
++    )
++    session = get_db()
+     try:
+-        note = await crud.get(session, id)
+-        if not note or note["owner_id"] != current_user.id:
+-            raise HTTPException(status_code=404, detail=f"Note with id {id} not found")
+-        await crud.put(session, id, payload)
+-        response = await crud.get(session, id)
+-        return response
+-    except HTTPException:
++        note = crud.get(session, note_id)
++        if not note or note["owner_id"] != current_user().id:
++            raise HTTPExc(404, f"Note with id {note_id} not found")
++        crud.put(session, note_id, payload)
++        response = crud.get(session, note_id)
++        return jsonify(_serialize(response))
++    except HTTPExc:
+         raise
+     except Exception as e:
+-        raise HTTPException(status_code=400, detail=f"Failed to update note: {str(e)}")
++        raise HTTPExc(400, f"Failed to update note: {str(e)}")
+ 
+ 
+-@router.delete(
+-    "/{id}",
+-    response_model=NoteDB,
+-    responses={404: {"model": ErrorResponse}, 422: {"description": "Invalid note ID"}},
+-)
+-async def delete_note(
+-    id: int = Path(..., gt=0, description="Note ID"),
+-    session: AsyncSession = Depends(get_db),
+-    current_user: UserDB = Depends(get_current_active_user),
+-):
++@bp.delete("/<id>")
++@auth_required
++def delete_note(id):
+     """Delete a note by ID"""
++    note_id = validate_path_id(id)
++    session = get_db()
+     try:
+-        note = await crud.get(session, id)
+-        if not note or note["owner_id"] != current_user.id:
+-            raise HTTPException(status_code=404, detail=f"Note with id {id} not found")
+-        await crud.delete_note(session, id)
+-        return note
+-    except HTTPException:
++        note = crud.get(session, note_id)
++        if not note or note["owner_id"] != current_user().id:
++            raise HTTPExc(404, f"Note with id {note_id} not found")
++        crud.delete_note(session, note_id)
++        return jsonify(_serialize(note))
++    except HTTPExc:
+         raise
+     except Exception as e:
+-        raise HTTPException(status_code=400, detail=f"Failed to delete note: {str(e)}")
++        raise HTTPExc(400, f"Failed to delete note: {str(e)}")
+diff --git a/src/app/api/openapi.py b/src/app/api/openapi.py
+new file mode 100644
+index 0000000..e1b55dc
+--- /dev/null
++++ b/src/app/api/openapi.py
+@@ -0,0 +1,323 @@
++"""OpenAPI document and Swagger UI.
++
++FastAPI served ``/openapi.json`` and ``/docs`` out of the box. Flask does not,
++so the schema is generated from the same Pydantic models and served alongside a
++Swagger UI page (FastAPI's own /docs also loads Swagger UI from a CDN, so the
++delivery mechanism is unchanged).
++"""
++
++from flask import Blueprint, jsonify
++
++from app.api.models import (
++    ErrorResponse,
++    NoteDB,
++    NoteSchema,
++    Token,
++    UserCreate,
++    UserDB,
++)
++from app.api.ping import PingResponse
++from app.api.validation import NotesQuery
++
++bp = Blueprint("openapi", __name__)
++
++TITLE = "Notes API"
++DESCRIPTION = "A simple API for managing notes with search and filtering"
++VERSION = "1.0.0"
++
++_MODELS = {
++    "PingResponse": PingResponse,
++    "UserCreate": UserCreate,
++    "UserDB": UserDB,
++    "Token": Token,
++    "NoteSchema": NoteSchema,
++    "NoteDB": NoteDB,
++    "ErrorResponse": ErrorResponse,
++    "NotesQuery": NotesQuery,
++}
++
++
++def _schemas():
++    schemas = {}
++    for name, model in _MODELS.items():
++        schema = model.model_json_schema(
++            ref_template="#/components/schemas/{model}"
++        )
++        schemas.update(schema.pop("$defs", {}))
++        schemas[name] = schema
++    schemas["ValidationError"] = {
++        "title": "ValidationError",
++        "type": "object",
++        "properties": {
++            "loc": {
++                "title": "Location",
++                "type": "array",
++                "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
++            },
++            "msg": {"title": "Message", "type": "string"},
++            "type": {"title": "Error Type", "type": "string"},
++        },
++        "required": ["loc", "msg", "type"],
++    }
++    schemas["HTTPValidationError"] = {
++        "title": "HTTPValidationError",
++        "type": "object",
++        "properties": {
++            "detail": {
++                "title": "Detail",
++                "type": "array",
++                "items": {"$ref": "#/components/schemas/ValidationError"},
++            }
++        },
++    }
++    return schemas
++
++
++def _json_body(ref, required=True):
++    return {
++        "required": required,
++        "content": {"application/json": {"schema": {"$ref": ref}}},
++    }
++
++
++def _json_response(description, ref=None, is_array=False):
++    if ref is None:
++        return {"description": description}
++    schema = (
++        {"type": "array", "items": {"$ref": ref}} if is_array else {"$ref": ref}
++    )
++    return {"description": description, "content": {"application/json": {"schema": schema}}}
++
++
++_VALIDATION_RESPONSE = _json_response(
++    "Validation Error", "#/components/schemas/HTTPValidationError"
++)
++_ERROR_REF = "#/components/schemas/ErrorResponse"
++_NOTE_REF = "#/components/schemas/NoteDB"
++
++_ID_PARAM = {
++    "name": "id",
++    "in": "path",
++    "required": True,
++    "schema": {"type": "integer", "exclusiveMinimum": 0, "title": "Id"},
++    "description": "Note ID",
++}
++
++
++def build_spec():
++    return {
++        "openapi": "3.1.0",
++        "info": {"title": TITLE, "description": DESCRIPTION, "version": VERSION},
++        "paths": {
++            "/ping": {
++                "get": {
++                    "tags": ["health"],
++                    "summary": "Health check endpoint",
++                    "operationId": "pong_ping_get",
++                    "responses": {
++                        "200": _json_response(
++                            "Successful Response",
++                            "#/components/schemas/PingResponse",
++                        )
++                    },
++                }
++            },
++            "/auth/register": {
++                "post": {
++                    "tags": ["auth"],
++                    "summary": "Register",
++                    "operationId": "register_auth_register_post",
++                    "requestBody": _json_body("#/components/schemas/UserCreate"),
++                    "responses": {
++                        "201": _json_response(
++                            "Successful Response", "#/components/schemas/UserDB"
++                        ),
++                        "400": _json_response("Bad Request", _ERROR_REF),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                }
++            },
++            "/auth/token": {
++                "post": {
++                    "tags": ["auth"],
++                    "summary": "Login For Access Token",
++                    "operationId": "login_for_access_token_auth_token_post",
++                    "requestBody": {
++                        "required": True,
++                        "content": {
++                            "application/x-www-form-urlencoded": {
++                                "schema": {
++                                    "type": "object",
++                                    "properties": {
++                                        "username": {"type": "string"},
++                                        "password": {
++                                            "type": "string",
++                                            "format": "password",
++                                        },
++                                    },
++                                    "required": ["username", "password"],
++                                }
++                            }
++                        },
++                    },
++                    "responses": {
++                        "200": _json_response(
++                            "Successful Response", "#/components/schemas/Token"
++                        ),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                }
++            },
++            "/notes/": {
++                "get": {
++                    "tags": ["notes"],
++                    "summary": "Read Notes",
++                    "operationId": "read_notes_notes__get",
++                    "security": [{"OAuth2PasswordBearer": []}],
++                    "parameters": [
++                        {
++                            "name": "skip",
++                            "in": "query",
++                            "required": False,
++                            "schema": {"type": "integer", "minimum": 0, "default": 0},
++                            "description": "Number of items to skip",
++                        },
++                        {
++                            "name": "limit",
++                            "in": "query",
++                            "required": False,
++                            "schema": {
++                                "type": "integer",
++                                "minimum": 1,
++                                "maximum": 100,
++                                "default": 10,
++                            },
++                            "description": "Maximum number of items to return",
++                        },
++                        {
++                            "name": "search",
++                            "in": "query",
++                            "required": False,
++                            "schema": {"type": "string", "maxLength": 100},
++                            "description": "Search term for title/description",
++                        },
++                        {
++                            "name": "completed",
++                            "in": "query",
++                            "required": False,
++                            "schema": {"type": "boolean"},
++                            "description": "Filter by completion status",
++                        },
++                        {
++                            "name": "tag",
++                            "in": "query",
++                            "required": False,
++                            "schema": {"type": "string"},
++                            "description": "Filter by tag",
++                        },
++                    ],
++                    "responses": {
++                        "200": _json_response(
++                            "Successful Response", _NOTE_REF, is_array=True
++                        ),
++                        "400": _json_response("Bad Request", _ERROR_REF),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                },
++                "post": {
++                    "tags": ["notes"],
++                    "summary": "Create Note",
++                    "operationId": "create_note_notes__post",
++                    "security": [{"OAuth2PasswordBearer": []}],
++                    "requestBody": _json_body("#/components/schemas/NoteSchema"),
++                    "responses": {
++                        "201": _json_response("Successful Response", _NOTE_REF),
++                        "400": _json_response("Bad Request", _ERROR_REF),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                },
++            },
++            "/notes/{id}": {
++                "get": {
++                    "tags": ["notes"],
++                    "summary": "Read Note",
++                    "operationId": "read_note_notes__id__get",
++                    "security": [{"OAuth2PasswordBearer": []}],
++                    "parameters": [_ID_PARAM],
++                    "responses": {
++                        "200": _json_response("Successful Response", _NOTE_REF),
++                        "404": _json_response("Not Found", _ERROR_REF),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                },
++                "put": {
++                    "tags": ["notes"],
++                    "summary": "Update Note",
++                    "operationId": "update_note_notes__id__put",
++                    "security": [{"OAuth2PasswordBearer": []}],
++                    "parameters": [_ID_PARAM],
++                    "requestBody": _json_body("#/components/schemas/NoteSchema"),
++                    "responses": {
++                        "200": _json_response("Successful Response", _NOTE_REF),
++                        "404": _json_response("Not Found", _ERROR_REF),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                },
++                "delete": {
++                    "tags": ["notes"],
++                    "summary": "Delete Note",
++                    "operationId": "delete_note_notes__id__delete",
++                    "security": [{"OAuth2PasswordBearer": []}],
++                    "parameters": [_ID_PARAM],
++                    "responses": {
++                        "200": _json_response("Successful Response", _NOTE_REF),
++                        "404": _json_response("Not Found", _ERROR_REF),
++                        "422": _VALIDATION_RESPONSE,
++                    },
++                },
++            },
++        },
++        "components": {
++            "schemas": _schemas(),
++            "securitySchemes": {
++                "OAuth2PasswordBearer": {
++                    "type": "oauth2",
++                    "flows": {"password": {"scopes": {}, "tokenUrl": "auth/token"}},
++                }
++            },
++        },
++    }
++
++
++@bp.get("/openapi.json")
++def openapi_json():
++    return jsonify(build_spec())
++
++
++_SWAGGER_HTML = """<!DOCTYPE html>
++<html>
++<head>
++<link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
++<title>%(title)s - Swagger UI</title>
++</head>
++<body>
++<div id="swagger-ui"></div>
++<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
++<script>
++const ui = SwaggerUIBundle({
++    url: '/openapi.json',
++    dom_id: '#swagger-ui',
++    presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
++    layout: "BaseLayout",
++    deepLinking: true,
++    showExtensions: true,
++    showCommonExtensions: true,
++})
++</script>
++</body>
++</html>""" % {"title": TITLE}
++
++
++@bp.get("/docs")
++def swagger_ui():
++    return _SWAGGER_HTML, 200, {"Content-Type": "text/html; charset=utf-8"}
+diff --git a/src/app/api/ping.py b/src/app/api/ping.py
+index 8259c94..d1247c2 100755
+--- a/src/app/api/ping.py
++++ b/src/app/api/ping.py
+@@ -1,10 +1,10 @@
+-from fastapi import APIRouter, Depends
++from flask import Blueprint, jsonify
+ from pydantic import BaseModel
+-from sqlalchemy.ext.asyncio import AsyncSession
+ from sqlalchemy import text
++
+ from app.db import get_db
+ 
+-router = APIRouter()
++bp = Blueprint("ping", __name__)
+ 
+ 
+ class PingResponse(BaseModel):
+@@ -14,29 +14,29 @@ class PingResponse(BaseModel):
+     message: str
+ 
+ 
+-@router.get(
+-    "/ping",
+-    response_model=PingResponse,
+-    tags=["health"],
+-    summary="Health check endpoint",
+-)
+-async def pong(session: AsyncSession = Depends(get_db)):
++@bp.get("/ping")
++def pong():
+     """
+     Health check endpoint to verify API and database connectivity.
+ 
+     Returns the current status of the API and database connection.
+     """
++    session = get_db()
+     try:
+         # Verify database connection by executing a simple query
+-        await session.execute(text("SELECT 1"))
++        session.execute(text("SELECT 1"))
+         db_status = "connected"
+     except Exception:
++        session.rollback()
+         db_status = "disconnected"
+ 
+     if db_status == "disconnected":
+-        return PingResponse(
++        payload = PingResponse(
+             status="degraded",
+             message="API is running but database connection is unavailable",
+         )
+-
+-    return PingResponse(status="healthy", message="API and database are operational")
++    else:
++        payload = PingResponse(
++            status="healthy", message="API and database are operational"
++        )
++    return jsonify(payload.model_dump(mode="json"))
+diff --git a/src/app/api/validation.py b/src/app/api/validation.py
+new file mode 100644
+index 0000000..e7f99db
+--- /dev/null
++++ b/src/app/api/validation.py
+@@ -0,0 +1,149 @@
++"""Request validation that reproduces FastAPI's 422 error payloads.
++
++FastAPI validates body / path / query parameters with Pydantic and reports
++failures as a list of error objects whose ``loc`` is prefixed with the
++parameter source (``body``, ``path``, ``query``). Flask does none of this, so
++the same Pydantic models are driven manually here and their errors are
++reshaped into the identical envelope.
++"""
++
++from typing import Optional, Type
++
++from flask import request
++from pydantic import BaseModel, Field, ValidationError
++
++from app.api.errors import RequestValidationError
++
++
++def _jsonable(value):
++    """Make a pydantic ``ctx`` value JSON-serialisable (some hold exceptions)."""
++    if isinstance(value, (str, int, float, bool)) or value is None:
++        return value
++    if isinstance(value, dict):
++        return {k: _jsonable(v) for k, v in value.items()}
++    if isinstance(value, (list, tuple)):
++        return [_jsonable(v) for v in value]
++    return str(value)
++
++
++def to_fastapi_errors(exc: ValidationError, source: str) -> list:
++    """Reshape pydantic errors into FastAPI's ``detail`` list."""
++    errors = []
++    for err in exc.errors():
++        item = {
++            "type": err["type"],
++            "loc": [source, *[str(part) for part in err["loc"]]],
++            "msg": err["msg"],
++            "input": _jsonable(err.get("input")),
++        }
++        if err.get("ctx"):
++            item["ctx"] = _jsonable(err["ctx"])
++        errors.append(item)
++    return errors
++
++
++def validate_body(model: Type[BaseModel]) -> BaseModel:
++    """Parse and validate the JSON body, raising FastAPI-shaped 422s."""
++    try:
++        payload = request.get_json(silent=True)
++    except Exception:
++        payload = None
++    if payload is None:
++        payload = {}
++    if not isinstance(payload, dict):
++        raise RequestValidationError(
++            [
++                {
++                    "type": "model_attributes_type",
++                    "loc": ["body"],
++                    "msg": "Input should be a valid dictionary or object to extract fields from",
++                    "input": payload,
++                }
++            ]
++        )
++    try:
++        return model.model_validate(payload)
++    except ValidationError as exc:
++        raise RequestValidationError(to_fastapi_errors(exc, "body")) from exc
++
++
++class _PathId(BaseModel):
++    id: int = Field(gt=0)
++
++
++def validate_path_id(raw_id: str) -> int:
++    """Validate the ``{id}`` path parameter (``Path(..., gt=0)`` in FastAPI)."""
++    try:
++        return _PathId.model_validate({"id": raw_id}).id
++    except ValidationError as exc:
++        raise RequestValidationError(to_fastapi_errors(exc, "path")) from exc
++
++
++class NotesQuery(BaseModel):
++    """Mirrors the Query(...) declarations on ``read_notes``."""
++
++    skip: int = Field(0, ge=0)
++    limit: int = Field(10, ge=1, le=100)
++    search: Optional[str] = Field(None, max_length=100)
++    completed: Optional[bool] = None
++    tag: Optional[str] = None
++
++
++def validate_notes_query() -> NotesQuery:
++    """Validate the notes list query string, raising FastAPI-shaped 422s."""
++    # Only pass through keys the client actually sent so declared defaults apply.
++    supplied = {
++        key: request.args.get(key)
++        for key in ("skip", "limit", "search", "completed", "tag")
++        if key in request.args
++    }
++    try:
++        return NotesQuery.model_validate(supplied)
++    except ValidationError as exc:
++        raise RequestValidationError(to_fastapi_errors(exc, "query")) from exc
++
++
++def validate_login_form() -> tuple:
++    """Validate the OAuth2 password-grant form fields.
++
++    FastAPI's ``OAuth2PasswordRequestForm`` reports absent form fields as
++    ``{"type": "missing", "input": null}`` rather than as a pydantic string
++    error, so the errors are constructed directly to match.
++    """
++    errors = []
++    values = {}
++    for field in ("username", "password"):
++        value = request.form.get(field)
++        if value is None:
++            errors.append(
++                {
++                    "type": "missing",
++                    "loc": ["body", field],
++                    "msg": "Field required",
++                    "input": None,
++                }
++            )
++        else:
++            values[field] = value
++    if errors:
++        raise RequestValidationError(errors)
++    return values["username"], values["password"]
++
++
++def collect(*validators):
++    """Run several validators and merge their errors into one 422.
++
++    FastAPI validates path, query and body in a single pass and reports every
++    failure in one ``detail`` list, so callers with more than one parameter
++    source must accumulate rather than raise on the first failure.
++    """
++    results, errors = [], []
++    for validator in validators:
++        try:
++            results.append(validator())
++        except RequestValidationError as exc:
++            results.append(None)
++            errors.extend(exc.errors)
++    if errors:
++        raise RequestValidationError(errors)
++    return results
+diff --git a/src/app/db.py b/src/app/db.py
+index ad8512a..bd535a0 100755
+--- a/src/app/db.py
++++ b/src/app/db.py
+@@ -8,26 +8,35 @@ from sqlalchemy import (
+     DateTime,
+     JSON,
+     ForeignKey,
++    create_engine,
+ )
+-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
++from sqlalchemy.orm import sessionmaker
+ from sqlalchemy.sql import func
++from flask import g
+ 
+ from app.config import get_settings
+ 
+ settings = get_settings()
+ 
+ # SQLAlchemy engine and metadata
+-# Convert "postgresql://" to "postgresql+asyncpg://" if it isn't already
++# Flask/psycopg2 is synchronous: normalise any async driver in the URL back to
++# its sync equivalent so the same DATABASE_URL keeps working after the migration.
+ db_url = settings.database_url
+-if db_url.startswith("postgresql://"):
+-    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
++if db_url.startswith("postgresql+asyncpg://"):
++    db_url = db_url.replace("postgresql+asyncpg://", "postgresql://", 1)
++if db_url.startswith("sqlite+aiosqlite://"):
++    db_url = db_url.replace("sqlite+aiosqlite://", "sqlite://", 1)
+ 
+-engine = create_async_engine(
+-    db_url,
+-    echo=False,
+-    pool_size=settings.db_pool_size,
+-    max_overflow=settings.db_max_overflow,
+-)
++# SQLite uses a pool class that does not accept size/overflow arguments.
++_engine_kwargs = {"echo": False}
++if not db_url.startswith("sqlite"):
++    _engine_kwargs.update(
++        pool_size=settings.db_pool_size,
++        max_overflow=settings.db_max_overflow,
++        pool_pre_ping=True,
++    )
++
++engine = create_engine(db_url, **_engine_kwargs)
+ metadata = MetaData()
+ 
+ # Users table for authentication
+@@ -56,10 +65,23 @@ notes = Table(
+     Column("owner_id", Integer, ForeignKey("users.id"), nullable=False),
+ )
+ 
+-# Async session maker
+-async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
++# Session factory
++SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, future=True)
++
++
++def get_db():
++    """Return the request-scoped session, creating it on first use.
++
++    Replaces the FastAPI ``Depends(get_db)`` generator: Flask stores the session
++    on the application context (``g``) and tears it down in ``close_db``.
++    """
++    if "db" not in g:
++        g.db = SessionLocal()
++    return g.db
+ 
+ 
+-async def get_db():
+-    async with async_session() as session:
+-        yield session
++def close_db(exc=None):
++    """Teardown hook registered with ``app.teardown_appcontext``."""
++    session = g.pop("db", None)
++    if session is not None:
++        session.close()
+diff --git a/src/app/main.py b/src/app/main.py
+index 05b7aca..510e58a 100755
+--- a/src/app/main.py
++++ b/src/app/main.py
+@@ -1,41 +1,69 @@
+-from fastapi import FastAPI
+-from starlette.middleware.cors import CORSMiddleware
+-from contextlib import asynccontextmanager
++from flask import Flask, redirect, request
++from werkzeug.routing import RequestRedirect
+ 
+-from app.api import notes, ping, auth
+-from app.db import engine
++from app.api import auth, notes, openapi, ping
++from app.api.cors import init_cors
++from app.api.errors import HTTPExc, register_error_handlers
++from app.db import close_db, engine
+ from app.config import get_settings
+ 
++settings = get_settings()
+ 
+-@asynccontextmanager
+-async def lifespan(app: FastAPI):
+-    print("Starting up...")
+-    yield
+-    print("Shutting down...")
+-    await engine.dispose()
+ 
++def create_app() -> Flask:
++    app = Flask(__name__)
+ 
+-app = FastAPI(
+-    title="Notes API",
+-    description="A simple API for managing notes with search and filtering",
+-    version="1.0.0",
+-    lifespan=lifespan,
+-)
++    # FastAPI emits response fields in model declaration order; Flask sorts JSON
++    # keys by default, so that is turned off to keep payloads byte-comparable.
++    app.json.sort_keys = False
+ 
++    register_error_handlers(app)
+ 
+-settings = get_settings()
++    @app.before_request
++    def _starlette_slash_redirect():
++        """Starlette redirects a missing trailing slash with 307, Werkzeug with 308.
++
++        Flask treats RequestRedirect as a RoutingException and returns it before
++        error handlers run, so it has to be intercepted here.
++        """
++        exc = request.routing_exception
++        if isinstance(exc, RequestRedirect):
++            return redirect(exc.new_url, code=307)
++        return None
++
++    # CORS configuration - only allow specific origins in production
++    allowed_origins = settings.allowed_origins.split(",")
++    init_cors(app, allowed_origins)
++
++    @app.before_request
++    def _reject_implicit_methods():
++        """Starlette does not auto-register HEAD/OPTIONS for GET routes.
++
++        Werkzeug does, so requests Starlette answered with 405 would otherwise
++        succeed. Non-CORS HEAD/OPTIONS are rejected here to preserve behaviour.
++        """
++        if request.method not in ("HEAD", "OPTIONS"):
++            return None
++        if request.headers.get("Origin") and request.headers.get(
++            "Access-Control-Request-Method"
++        ):
++            return None  # CORS preflight, handled by init_cors
++        rule = request.url_rule
++        if rule is None:
++            return None
++        explicit = sorted(rule.methods - {"HEAD", "OPTIONS"})
++        if request.method not in explicit:
++            raise HTTPExc(405, "Method Not Allowed", {"Allow": ", ".join(explicit)})
++        return None
++
++    app.teardown_appcontext(close_db)
++
++    app.register_blueprint(ping.bp)
++    app.register_blueprint(openapi.bp)
++    app.register_blueprint(auth.bp, url_prefix="/auth")
++    app.register_blueprint(notes.bp, url_prefix="/notes")
+ 
+-# CORS configuration - only allow specific origins in production
+-allowed_origins = settings.allowed_origins.split(",")
++    return app
+ 
+-app.add_middleware(
+-    CORSMiddleware,
+-    allow_origins=allowed_origins,
+-    allow_credentials=True,
+-    allow_methods=["DELETE", "GET", "POST", "PUT"],
+-    allow_headers=["*"],
+-)
+ 
+-app.include_router(ping.router)
+-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+-app.include_router(notes.router, prefix="/notes", tags=["notes"])
++app = create_app()
+diff --git a/src/entrypoint.sh b/src/entrypoint.sh
+index f7576f7..625fca9 100755
+--- a/src/entrypoint.sh
++++ b/src/entrypoint.sh
+@@ -8,5 +8,5 @@ echo "Running database migrations..."
+ alembic upgrade head
+ 
+ # Start application
+-echo "Starting FastAPI application..."
++echo "Starting Flask application..."
+ exec "$@"
+diff --git a/src/main.py b/src/main.py
+index 1368033..febcf38 100755
+--- a/src/main.py
++++ b/src/main.py
+@@ -1,10 +1,9 @@
+-import uvicorn
++from app.main import app
+ 
+ 
+ host = "0.0.0.0"
+ port = 8002
+-app_name = "app.main:app"
+ 
+ 
+ if __name__ == "__main__":
+-    uvicorn.run(app_name, host=host, port=port)
++    app.run(host=host, port=port)
+diff --git a/src/migrations/env.py b/src/migrations/env.py
+index d1edc73..04e10eb 100644
+--- a/src/migrations/env.py
++++ b/src/migrations/env.py
+@@ -1,4 +1,3 @@
+-import asyncio
+ import os
+ import sys
+ from logging.config import fileConfig
+@@ -6,9 +5,8 @@ from logging.config import fileConfig
+ # Add src to path so we can import our app
+ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+ 
+-from sqlalchemy import pool
++from sqlalchemy import engine_from_config, pool
+ from sqlalchemy.engine import Connection
+-from sqlalchemy.ext.asyncio import async_engine_from_config
+ 
+ from alembic import context
+ from app.db import metadata
+@@ -18,11 +16,15 @@ from app.config import get_settings
+ # access to the values within the .ini file in use.
+ config = context.config
+ 
+-# Set the sqlalchemy URL dynamically
++# Set the sqlalchemy URL dynamically.
++# The application is synchronous (Flask + psycopg2), so any async driver in the
++# configured URL is normalised back to its sync equivalent.
+ settings = get_settings()
+ db_url = settings.database_url
+-if db_url.startswith("postgresql://"):
+-    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
++if db_url.startswith("postgresql+asyncpg://"):
++    db_url = db_url.replace("postgresql+asyncpg://", "postgresql://", 1)
++if db_url.startswith("sqlite+aiosqlite://"):
++    db_url = db_url.replace("sqlite+aiosqlite://", "sqlite://", 1)
+ config.set_main_option("sqlalchemy.url", db_url)
+ 
+ # Interpret the config file for Python logging.
+@@ -71,28 +73,23 @@ def do_run_migrations(connection: Connection) -> None:
+         context.run_migrations()
+ 
+ 
+-async def run_async_migrations() -> None:
+-    """In this scenario we need to create an Engine
+-    and associate a connection with the context.
++def run_migrations_online() -> None:
++    """Run migrations in 'online' mode.
+ 
++    In this scenario we need to create an Engine
++    and associate a connection with the context.
+     """
+ 
+-    connectable = async_engine_from_config(
++    connectable = engine_from_config(
+         config.get_section(config.config_ini_section, {}),
+         prefix="sqlalchemy.",
+         poolclass=pool.NullPool,
+     )
+ 
+-    async with connectable.connect() as connection:
+-        await connection.run_sync(do_run_migrations)
+-
+-    await connectable.dispose()
+-
+-
+-def run_migrations_online() -> None:
+-    """Run migrations in 'online' mode."""
++    with connectable.connect() as connection:
++        do_run_migrations(connection)
+ 
+-    asyncio.run(run_async_migrations())
++    connectable.dispose()
+ 
+ 
+ if context.is_offline_mode():
+diff --git a/src/requirements-old.txt b/src/requirements-old.txt
+deleted file mode 100755
+index 239feb1..0000000
+--- a/src/requirements-old.txt
++++ /dev/null
+@@ -1,38 +0,0 @@
+-asyncpg
+-astroid
+-attrs
+-certifi
+-chardet
+-Click
+-databases[postgresql]
+-fastapi
+-h11
+-httptools
+-httpx
+-idna
+-isort
+-lazy-object-proxy
+-mccabe
+-more-itertools
+-packaging
+-pluggy
+-psycopg2-binary
+-py
+-pydantic
+-pylint
+-pyparsing
+-python-dotenv
+-pytz
+-six
+-SQLAlchemy
+-starlette
+-urllib3
+-uvicorn
+-uvloop
+-wcwidth
+-websockets
+-wrapt
+-
+-#dev
+-pytest
+-requests
+\ No newline at end of file
+diff --git a/src/requirements.txt b/src/requirements.txt
+index adf1616..bc4cf89 100644
+--- a/src/requirements.txt
++++ b/src/requirements.txt
+@@ -1,52 +1,27 @@
+-annotated-doc==0.0.4
++alembic==1.18.4
+ annotated-types==0.7.0
+-anyio==4.13.0
+-asyncpg==0.31.0
+-attrs==25.4.0
++bcrypt==4.3.0
++blinker==1.9.0
+ certifi==2026.6.17
+-chardet==5.2.0
+ charset-normalizer==3.4.7
+ click==8.4.2
+-databases==0.9.0
+-dill==0.4.1
+-greenlet==3.5.3
+-h11==0.16.0
+-httpcore==1.0.9
+-httptools==0.8.0
+-httpx==0.28.1
++dnspython==2.8.0
++email-validator==2.3.0
++Flask==3.1.2
++gunicorn==23.0.0
+ idna==3.18
+-iniconfig==2.3.0
+-lazy-object-proxy==1.12.0
+-mccabe==0.7.0
+-more-itertools==10.8.0
++itsdangerous==2.2.0
++Jinja2==3.1.6
++MarkupSafe==3.0.2
+ packaging==25.0
+-platformdirs==4.10.0
+-pluggy==1.6.0
++passlib==1.7.4
+ psycopg2-binary==2.9.12
+-py==1.11.0
+ pydantic==2.13.4
+ pydantic-settings==2.14.2
+-Pygments==2.20.0
+-pyparsing==3.3.2
+ python-dotenv==1.2.2
+-pytz==2025.2
+-requests==2.34.2
+-six==1.17.0
++python-jose==3.5.0
+ SQLAlchemy==2.0.50
+-fastapi==0.136.1
+-tomlkit==0.15.0
+ typing-inspection==0.4.2
+ typing_extensions==4.15.0
+ urllib3==2.7.0
+-uvicorn==0.51.0
+-uvloop==0.22.1
+-wcwidth==0.7.0
+-websockets==16.0
+-wrapt==2.2.1
+-alembic==1.18.4
+-passlib==1.7.4
+-bcrypt==4.3.0
+-python-jose==3.5.0
+-email-validator==2.3.0
+-python-multipart==0.0.31
+-aiosqlite==0.22.1
++Werkzeug==3.1.3
+diff --git a/src/test.db b/src/test.db
+deleted file mode 100644
+index 8cd4e25af46113a87816cd3e492925c419a7c2b8..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 40960
+zcmeI)&2H0J6u@!2ElHg!gq^o{Qz=#vv<=a$5QNr1AUM=bXZRXfCNW@<j}p6ltWZHb
+z0I$GHjOJ~ScmbA3Z07nBw|1t54J+$!)vkSged7B&Cy}n=c6X-}#({V;nU4HeG_-S?
+zu4`9?&@|1EYelZ<vMhI&(gXQh&+MPJYiJifey-NOX-4IXR;$+jJ-br<r}|*!`^u-4
+zE3%0N0R#|0009ILKmdW?E%3l7nGI8a6OISL>+rQVp2R`qg^@Q1hCv(*)Ny6YwOc(~
+zw4H7Ho;abG=sH666!qgvEq}Re{$c8edOmo68u&7@H;`L(k#TbPY`@G4WSgzO$|ZBd
+z)DPxfVKUl3zWe1<!l#|GvC}r|-J??3G)?`38T*fiKkifAY<U)~*SglR(?M5^a3FPh
+z_6^$=PPZqVy-w%6s2Fh=4+HUM%iX%!a_gJTrj<KA2%`Qp+>gV__^8vy`ucjlS3kWg
+zajo0!*exd);~4zJ)3N_F61R3`g0lCOMHJgIx4rfqJJ)0KY8*_xQ-*cdZQp6R_r-1d
+zzRdW*N``v9>)P!bPSRFSFSdkhU$<S`*|K-VK@?0Q)xBapJX10+n)=%`Z|a<vY{&j6
+zP)DU1^q$k+*~`>kzH5>^)gtQY)t0+dGA&b&^1*|V9}ZR5Ge3>2`enkZW9#tkqN<1Y
+zf2(>>anxohR}ZR5)K9I4<a{#1qii?la{c4g(}Iz;kS~R2e)LSfb@u%zdNr92j>7z}
+zvSd~G{WyFXoLCgUPXBy{E7qZ<m(8^`{hgr%{9!P99QM7JGO4nB=MEQgDsv|jpV?*J
+z_+WH2h{k4quv=Ycx97Ix`%273@b;hgMeY_e@vMq<d7)(Ptm&Gnfat|g&f-1)AfBjW
+zZ$8+@T*IRLkWJ?ET2-!k?W-n#SP(z}0R#|0009ILKmY**5I~?H0%!Gw)y9*4|I)^0
+z^HR`gCSUL~|1U^#83qCfAb<b@2q1s}0tg_000J|C+TyB_o&P7_|I3H|Sr9+~0R#|0
+z009ILKmY**5I~^70_qR^ng16!!wd}p1Q0*~0R#|0009ILKmdW+Klo$*PbnaP00Iag
+zfB*srAb<b@2p~{s0iORabb1*a0tg_000IagfB*srAb<b@N`UA8DFg%%KmY**5I_I{
+z1Q0*~0R)OK!2G}XIc9_iAb<b@2q1s}0tg_000Iaw|EC5JKmY**5I_I{1Q0*~0R#{z
+GzQBLRcCy<5
+
+diff --git a/src/tests/conftest.py b/src/tests/conftest.py
+index 4679a88..708254e 100755
+--- a/src/tests/conftest.py
++++ b/src/tests/conftest.py
+@@ -1,58 +1,89 @@
++"""Test configuration for the Flask application.
++
++The FastAPI suite mocked every ``crud`` call and injected an ``AsyncMock``
++session through ``app.dependency_overrides``. Flask has no dependency-override
++mechanism, so the same scenarios are exercised against a real (throwaway)
++SQLite database instead; the intent of each test is unchanged.
++"""
++
++import os
++import tempfile
++
+ import pytest
+-from starlette.testclient import TestClient
+-from unittest.mock import AsyncMock
+-from contextlib import asynccontextmanager
+ 
+-from app.main import app
+-from app.api.models import UserDB
+-from datetime import datetime
++# The engine is built at import time from Settings, so the database URL has to
++# be in the environment before anything under ``app`` is imported.
++_DB_FD, _DB_PATH = tempfile.mkstemp(suffix=".db")
++os.close(_DB_FD)
++os.environ["DATABASE_URL"] = f"sqlite:///{_DB_PATH}"
++os.environ.setdefault("SECRET_KEY", "test-secret-key")
+ 
++from app.db import engine, metadata  # noqa: E402
++from app.main import create_app  # noqa: E402
+ 
+-@asynccontextmanager
+-async def mock_lifespan(app):
++
++@pytest.fixture(scope="session", autouse=True)
++def _schema():
++    metadata.create_all(engine)
+     yield
++    metadata.drop_all(engine)
++    engine.dispose()
++    try:
++        os.unlink(_DB_PATH)
++    except OSError:
++        pass
+ 
+ 
+-@pytest.fixture(scope="module")
+-def test_app():
+-    # Disable actual database connection in lifespan
+-    app.router.lifespan_context = mock_lifespan
++@pytest.fixture()
++def flask_app():
++    application = create_app()
++    application.config.update(TESTING=True)
++    return application
+ 
+-    with TestClient(app) as client:
+-        yield client
+ 
++@pytest.fixture()
++def test_app(flask_app):
++    # Deliberately not used as a context manager: `with test_client()` keeps the
++    # request context alive after each call, which would stop
++    # teardown_appcontext from closing the session and leave SQLite mid-transaction.
++    return flask_app.test_client()
+ 
+-@pytest.fixture(scope="module")
+-def test_user():
+-    return UserDB(
+-        id=1,
+-        username="testuser",
+-        email="test@example.com",
+-        is_active=True,
+-        created_date=datetime.now(),
+-    )
+ 
++@pytest.fixture(autouse=True)
++def _clean_tables(_schema):
++    """Truncate between tests so ids and listings stay predictable."""
++    from app.db import notes, users
++
++    with engine.begin() as conn:
++        conn.execute(notes.delete())
++        conn.execute(users.delete())
++    yield
+ 
+-@pytest.fixture(scope="module")
+-def token_headers(test_user):
+-    # In a real scenario, we'd generate a real token
+-    # For mocking, we'll just provide a dummy header and rely on dependency override
+-    return {"Authorization": "Bearer dummy-token"}
+ 
++def _register_and_login(client, username, email, password="password123"):
++    client.post(
++        "/auth/register",
++        json={"username": username, "email": email, "password": password},
++    )
++    response = client.post(
++        "/auth/token",
++        data={"username": username, "password": password},
++        content_type="application/x-www-form-urlencoded",
++    )
++    return response.get_json()["access_token"]
+ 
+-@pytest.fixture(autouse=True)
+-def override_auth_dependencies(test_user):
+-    from app.api.dependencies import get_current_active_user, get_db
+ 
+-    async def override_get_db():
+-        yield AsyncMock()
++@pytest.fixture()
++def token(test_app):
++    return _register_and_login(test_app, "testuser", "test@example.com")
+ 
+-    async def override_get_current_user():
+-        return test_user
+ 
+-    app.dependency_overrides[get_db] = override_get_db
+-    app.dependency_overrides[get_current_active_user] = override_get_current_user
++@pytest.fixture()
++def token_headers(token):
++    return {"Authorization": f"Bearer {token}"}
+ 
+-    yield
+ 
+-    app.dependency_overrides = {}
++@pytest.fixture()
++def second_token_headers(test_app):
++    other = _register_and_login(test_app, "otheruser", "other@example.com")
++    return {"Authorization": f"Bearer {other}"}
+diff --git a/src/tests/test_auth.py b/src/tests/test_auth.py
+index d75350d..6f2194d 100644
+--- a/src/tests/test_auth.py
++++ b/src/tests/test_auth.py
+@@ -1,86 +1,123 @@
+-from app.api import crud, security
+-
+-
+ class TestAuth:
+-    def test_register_user_success(self, test_app, monkeypatch):
++    def test_register_user_success(self, test_app):
+         test_payload = {
+             "username": "newuser",
+             "email": "new@example.com",
+             "password": "password123",
+         }
+-        test_response = {
+-            "id": 1,
+-            "username": "newuser",
+-            "email": "new@example.com",
+-            "is_active": True,
+-            "created_date": "2024-01-01T00:00:00",
+-        }
+-
+-        # Mock user not existing initially
+-        async def mock_get_username(session, username):
+-            if username == "newuser":
+-                if not hasattr(mock_get_username, "called"):
+-                    mock_get_username.called = True
+-                    return None
+-                return test_response
+-            return None
+-
+-        async def mock_get_email(session, email):
+-            return None
+-
+-        async def mock_create_user(session, payload, hashed_password):
+-            return 1
+-
+-        monkeypatch.setattr(crud, "get_user_by_username", mock_get_username)
+-        monkeypatch.setattr(crud, "get_user_by_email", mock_get_email)
+-        monkeypatch.setattr(crud, "create_user", mock_create_user)
+ 
+         response = test_app.post("/auth/register", json=test_payload)
+         assert response.status_code == 201
+-        assert response.json() == test_response
+ 
+-    def test_register_user_already_exists(self, test_app, monkeypatch):
+-        test_payload = {
++        body = response.get_json()
++        assert body["username"] == "newuser"
++        assert body["email"] == "new@example.com"
++        assert body["is_active"] is True
++        assert "id" in body and "created_date" in body
++        # the password must never be echoed back
++        assert "password" not in body and "hashed_password" not in body
++
++    def test_register_user_already_exists(self, test_app):
++        payload = {
+             "username": "existing",
+             "email": "existing@example.com",
+             "password": "password123",
+         }
++        assert test_app.post("/auth/register", json=payload).status_code == 201
+ 
+-        async def mock_get_username(session, username):
+-            return {"id": 1, "username": "existing"}
+-
+-        monkeypatch.setattr(crud, "get_user_by_username", mock_get_username)
+-
+-        response = test_app.post("/auth/register", json=test_payload)
++        response = test_app.post("/auth/register", json=payload)
+         assert response.status_code == 400
+-        assert "already registered" in response.json()["detail"].lower()
+-
+-    def test_login_success(self, test_app, monkeypatch):
+-        test_user_data = {
+-            "id": 1,
+-            "username": "testuser",
+-            "hashed_password": security.get_password_hash("password123"),
+-        }
++        assert "already registered" in response.get_json()["detail"].lower()
++
++    def test_register_duplicate_email(self, test_app):
++        assert (
++            test_app.post(
++                "/auth/register",
++                json={
++                    "username": "first",
++                    "email": "dupe@example.com",
++                    "password": "password123",
++                },
++            ).status_code
++            == 201
++        )
+ 
+-        async def mock_get_user(session, username):
+-            return test_user_data
++        response = test_app.post(
++            "/auth/register",
++            json={
++                "username": "second",
++                "email": "dupe@example.com",
++                "password": "password123",
++            },
++        )
++        assert response.status_code == 400
++        assert "email already registered" in response.get_json()["detail"].lower()
++
++    def test_register_invalid_payload(self, test_app):
++        # short password and malformed email are both rejected with 422
++        assert (
++            test_app.post(
++                "/auth/register",
++                json={
++                    "username": "shortpw",
++                    "email": "shortpw@example.com",
++                    "password": "short",
++                },
++            ).status_code
++            == 422
++        )
++        assert (
++            test_app.post(
++                "/auth/register",
++                json={
++                    "username": "bademail",
++                    "email": "not-an-email",
++                    "password": "password123",
++                },
++            ).status_code
++            == 422
++        )
+ 
+-        monkeypatch.setattr(crud, "get_user_by_username", mock_get_user)
++    def test_login_success(self, test_app):
++        test_app.post(
++            "/auth/register",
++            json={
++                "username": "testuser",
++                "email": "test@example.com",
++                "password": "password123",
++            },
++        )
+ 
+         response = test_app.post(
+-            "/auth/token", data={"username": "testuser", "password": "password123"}
++            "/auth/token",
++            data={"username": "testuser", "password": "password123"},
++            content_type="application/x-www-form-urlencoded",
+         )
+         assert response.status_code == 200
+-        assert "access_token" in response.json()
+-        assert response.json()["token_type"] == "bearer"
++        assert "access_token" in response.get_json()
++        assert response.get_json()["token_type"] == "bearer"
+ 
+-    def test_login_invalid_credentials(self, test_app, monkeypatch):
+-        async def mock_get_user(session, username):
+-            return None
+-
+-        monkeypatch.setattr(crud, "get_user_by_username", mock_get_user)
++    def test_login_invalid_credentials(self, test_app):
++        response = test_app.post(
++            "/auth/token",
++            data={"username": "wrong", "password": "wrong"},
++            content_type="application/x-www-form-urlencoded",
++        )
++        assert response.status_code == 401
+ 
++    def test_login_wrong_password(self, test_app):
++        test_app.post(
++            "/auth/register",
++            json={
++                "username": "pwuser",
++                "email": "pw@example.com",
++                "password": "password123",
++            },
++        )
+         response = test_app.post(
+-            "/auth/token", data={"username": "wrong", "password": "wrong"}
++            "/auth/token",
++            data={"username": "pwuser", "password": "notthepassword"},
++            content_type="application/x-www-form-urlencoded",
+         )
+         assert response.status_code == 401
++        assert response.headers.get("WWW-Authenticate") == "Bearer"
+diff --git a/src/tests/test_notes.py b/src/tests/test_notes.py
+index 37ef9b9..513f890 100755
+--- a/src/tests/test_notes.py
++++ b/src/tests/test_notes.py
+@@ -3,49 +3,64 @@ Comprehensive tests for the Notes API endpoints
+ """
+ 
+ import pytest
+-from datetime import datetime
+-from app.api import crud
+ 
+ 
+-def get_iso_date():
+-    """Generate current ISO format date"""
+-    return datetime.now().isoformat()
++def _create(client, headers, **overrides):
++    payload = {
++        "title": "something",
++        "description": "something else",
++        "completed": False,
++        "tags": [],
++    }
++    payload.update(overrides)
++    return client.post("/notes/", json=payload, headers=headers)
+ 
+ 
+-class TestCreateNote:
+-    """Tests for creating notes"""
++class TestAuthorization:
++    """Every notes route is behind the bearer token"""
+ 
+-    def test_create_note_success(self, test_app, monkeypatch, test_user):
+-        """Test successful note creation"""
+-        test_request_payload = {
+-            "title": "something",
+-            "description": "something else",
+-            "completed": False,
+-            "tags": ["work"],
+-        }
+-        test_response_payload = {
+-            "id": 1,
+-            "title": "something",
+-            "description": "something else",
+-            "completed": False,
+-            "is_deleted": False,
+-            "tags": ["work"],
+-            "owner_id": test_user.id,
+-            "created_date": get_iso_date(),
+-        }
+-
+-        async def mock_post(session, payload, owner_id):
+-            return 1
++    @pytest.mark.parametrize(
++        "method, path",
++        [
++            ("get", "/notes/"),
++            ("post", "/notes/"),
++            ("get", "/notes/1"),
++            ("put", "/notes/1"),
++            ("delete", "/notes/1"),
++        ],
++    )
++    def test_requires_token(self, test_app, method, path):
++        response = getattr(test_app, method)(path)
++        assert response.status_code == 401
++        assert response.get_json()["detail"] == "Not authenticated"
++        assert response.headers.get("WWW-Authenticate") == "Bearer"
++
++    def test_rejects_bad_token(self, test_app):
++        response = test_app.get(
++            "/notes/", headers={"Authorization": "Bearer not.a.real.token"}
++        )
++        assert response.status_code == 401
++        assert response.get_json()["detail"] == "Could not validate credentials"
+ 
+-        async def mock_get(session, id):
+-            return test_response_payload
+ 
+-        monkeypatch.setattr(crud, "post", mock_post)
+-        monkeypatch.setattr(crud, "get", mock_get)
++class TestCreateNote:
++    """Tests for creating notes"""
+ 
+-        response = test_app.post("/notes/", json=test_request_payload)
++    def test_create_note_success(self, test_app, token_headers):
++        """Test successful note creation"""
++        response = _create(
++            test_app, token_headers, title="something", tags=["work"]
++        )
+         assert response.status_code == 201
+-        assert response.json() == test_response_payload
++
++        body = response.get_json()
++        assert body["title"] == "something"
++        assert body["description"] == "something else"
++        assert body["completed"] is False
++        assert body["is_deleted"] is False
++        assert body["tags"] == ["work"]
++        assert body["id"] > 0
++        assert "created_date" in body and "owner_id" in body
+ 
+     @pytest.mark.parametrize(
+         "test_payload, expected_status",
+@@ -65,284 +80,151 @@ class TestCreateNote:
+         ],
+     )
+     def test_create_note_validation(
+-        self, test_app, monkeypatch, test_user, test_payload, expected_status
++        self, test_app, token_headers, test_payload, expected_status
+     ):
+         """Test note creation with invalid payloads"""
+-
+-        async def mock_post(session, payload, owner_id):
+-            return 1
+-
+-        async def mock_get(session, id):
+-            return {
+-                "id": 1,
+-                "title": test_payload.get("title", ""),
+-                "description": test_payload.get("description", ""),
+-                "completed": test_payload.get("completed", False),
+-                "is_deleted": False,
+-                "tags": test_payload.get("tags", []),
+-                "owner_id": test_user.id,
+-                "created_date": get_iso_date(),
+-            }
+-
+-        monkeypatch.setattr(crud, "post", mock_post)
+-        monkeypatch.setattr(crud, "get", mock_get)
+-
+-        response = test_app.post("/notes/", json=test_payload)
++        response = test_app.post("/notes/", json=test_payload, headers=token_headers)
+         assert response.status_code == expected_status
+ 
+ 
+ class TestReadNotes:
+     """Tests for reading notes"""
+ 
+-    def test_read_single_note(self, test_app, monkeypatch, test_user):
++    def test_read_single_note(self, test_app, token_headers):
+         """Test reading a single note by ID"""
+-        test_data = {
+-            "title": "something",
+-            "description": "something else",
+-            "id": 1,
+-            "completed": False,
+-            "is_deleted": False,
+-            "tags": [],
+-            "owner_id": test_user.id,
+-            "created_date": get_iso_date(),
+-        }
++        created = _create(test_app, token_headers).get_json()
+ 
+-        async def mock_get(session, id):
+-            return test_data
+-
+-        monkeypatch.setattr(crud, "get", mock_get)
+-
+-        response = test_app.get("/notes/1")
++        response = test_app.get(f"/notes/{created['id']}", headers=token_headers)
+         assert response.status_code == 200
+-        assert response.json() == test_data
++        assert response.get_json() == created
+ 
+-    def test_read_note_not_found(self, test_app, monkeypatch):
++    def test_read_note_not_found(self, test_app, token_headers):
+         """Test reading non-existent note returns 404"""
+-
+-        async def mock_get(session, id):
+-            return None
+-
+-        monkeypatch.setattr(crud, "get", mock_get)
+-
+-        response = test_app.get("/notes/999")
++        response = test_app.get("/notes/999", headers=token_headers)
+         assert response.status_code == 404
+-        assert "not found" in response.json()["detail"].lower()
++        assert "not found" in response.get_json()["detail"].lower()
+ 
+-    def test_read_note_invalid_id(self, test_app, monkeypatch):
++    def test_read_note_invalid_id(self, test_app, token_headers):
+         """Test reading note with invalid ID"""
+-        response = test_app.get("/notes/0")
+-        assert response.status_code == 422
++        assert test_app.get("/notes/0", headers=token_headers).status_code == 422
++        assert test_app.get("/notes/invalid", headers=token_headers).status_code == 422
+ 
+-        response = test_app.get("/notes/invalid")
+-        assert response.status_code == 422
+-
+-    def test_read_all_notes(self, test_app, monkeypatch, test_user):
++    def test_read_all_notes(self, test_app, token_headers):
+         """Test reading all notes with default pagination"""
+-        test_data = [
+-            {
+-                "title": "note 1",
+-                "description": "desc 1",
+-                "id": 1,
+-                "completed": False,
+-                "is_deleted": False,
+-                "tags": ["work"],
+-                "owner_id": test_user.id,
+-                "created_date": get_iso_date(),
+-            },
+-            {
+-                "title": "note 2",
+-                "description": "desc 2",
+-                "id": 2,
+-                "completed": False,
+-                "is_deleted": False,
+-                "tags": [],
+-                "owner_id": test_user.id,
+-                "created_date": get_iso_date(),
+-            },
+-        ]
+-
+-        async def mock_get_notes(
+-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
+-        ):
+-            return test_data
+-
+-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
+-
+-        response = test_app.get("/notes/")
++        _create(test_app, token_headers, title="note 1", description="desc 1",
++                tags=["work"])
++        _create(test_app, token_headers, title="note 2", description="desc 2")
++
++        response = test_app.get("/notes/", headers=token_headers)
+         assert response.status_code == 200
+-        assert len(response.json()) == 2
+-        assert response.json() == test_data
++        assert len(response.get_json()) == 2
+ 
+-    def test_read_notes_with_pagination(self, test_app, monkeypatch, test_user):
++    def test_read_notes_with_pagination(self, test_app, token_headers):
+         """Test note pagination with skip and limit"""
+-        test_data = [
+-            {
+-                "title": "note 1",
+-                "description": "desc 1",
+-                "id": 1,
+-                "completed": False,
+-                "is_deleted": False,
+-                "tags": [],
+-                "owner_id": test_user.id,
+-                "created_date": get_iso_date(),
+-            }
+-        ]
+-
+-        async def mock_get_notes(
+-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
+-        ):
+-            return test_data if skip == 0 and limit == 1 else []
+-
+-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
+-
+-        response = test_app.get("/notes/?skip=0&limit=1")
++        _create(test_app, token_headers, title="note 1", description="desc 1")
++        _create(test_app, token_headers, title="note 2", description="desc 2")
++
++        response = test_app.get("/notes/?skip=0&limit=1", headers=token_headers)
+         assert response.status_code == 200
+-        assert len(response.json()) == 1
++        assert len(response.get_json()) == 1
+ 
+-    def test_read_notes_pagination_invalid_limit(self, test_app, monkeypatch):
++    def test_read_notes_pagination_invalid_limit(self, test_app, token_headers):
+         """Test that limit exceeding maximum is rejected"""
++        assert (
++            test_app.get("/notes/?limit=101", headers=token_headers).status_code == 422
++        )
++        assert test_app.get("/notes/?limit=0", headers=token_headers).status_code == 422
++        assert test_app.get("/notes/?skip=-1", headers=token_headers).status_code == 422
+ 
+-        async def mock_get_notes(
+-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
+-        ):
+-            return []
++    def test_read_notes_filter_by_completion(self, test_app, token_headers):
++        """Test filtering notes by completion status"""
++        _create(test_app, token_headers, title="done note", completed=True)
++        _create(test_app, token_headers, title="open note", completed=False)
+ 
+-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
++        response = test_app.get("/notes/?completed=true", headers=token_headers)
++        assert response.status_code == 200
++        body = response.get_json()
++        assert len(body) == 1
++        assert body[0]["completed"] is True
+ 
+-        response = test_app.get("/notes/?limit=101")
+-        assert response.status_code == 422
++    def test_read_notes_search(self, test_app, token_headers):
++        """Test searching notes by title/description"""
++        _create(test_app, token_headers, title="unique title", description="desc 1")
++        _create(test_app, token_headers, title="other title", description="desc 2")
+ 
+-    def test_read_notes_filter_by_completion(self, test_app, monkeypatch, test_user):
+-        """Test filtering notes by completion status"""
+-        completed_notes = [
+-            {
+-                "title": "note 1",
+-                "description": "desc 1",
+-                "id": 1,
+-                "completed": True,
+-                "is_deleted": False,
+-                "tags": [],
+-                "owner_id": test_user.id,
+-                "created_date": get_iso_date(),
+-            }
+-        ]
+-
+-        async def mock_get_notes(
+-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
+-        ):
+-            if completed is True:
+-                return completed_notes
+-            return []
+-
+-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
+-
+-        response = test_app.get("/notes/?completed=true")
++        response = test_app.get("/notes/?search=unique", headers=token_headers)
+         assert response.status_code == 200
+-        assert len(response.json()) == 1
+-        assert response.json()[0]["completed"] is True
++        body = response.get_json()
++        assert len(body) == 1
++        assert "unique" in body[0]["title"].lower()
+ 
+-    def test_read_notes_search(self, test_app, monkeypatch, test_user):
+-        """Test searching notes by title/description"""
+-        search_results = [
+-            {
+-                "title": "unique title",
+-                "description": "desc 1",
+-                "id": 1,
+-                "completed": False,
+-                "is_deleted": False,
+-                "tags": [],
+-                "owner_id": test_user.id,
+-                "created_date": get_iso_date(),
+-            }
+-        ]
+-
+-        async def mock_get_notes(
+-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
+-        ):
+-            if search and "unique" in search:
+-                return search_results
+-            return []
+-
+-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
+-
+-        response = test_app.get("/notes/?search=unique")
++    def test_read_notes_filter_by_tag(self, test_app, token_headers):
++        """Test filtering notes by tag"""
++        _create(test_app, token_headers, title="tagged note", tags=["alpha"])
++        _create(test_app, token_headers, title="plain note", tags=["beta"])
++
++        response = test_app.get("/notes/?tag=alpha", headers=token_headers)
+         assert response.status_code == 200
+-        assert len(response.json()) == 1
+-        assert "unique" in response.json()[0]["title"].lower()
++        assert len(response.get_json()) == 1
++        assert test_app.get(
++            "/notes/?tag=nosuchtag", headers=token_headers
++        ).get_json() == []
+ 
+-    def test_read_notes_combined_filters(self, test_app, monkeypatch, test_user):
++    def test_read_notes_combined_filters(self, test_app, token_headers):
+         """Test combining search and completion filters"""
++        _create(test_app, token_headers, title="test note", completed=True)
++        _create(test_app, token_headers, title="test other", completed=False)
+ 
+-        async def mock_get_notes(
+-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
+-        ):
+-            if search == "test" and completed is True:
+-                return [
+-                    {
+-                        "title": "test note",
+-                        "description": "desc",
+-                        "id": 1,
+-                        "completed": True,
+-                        "is_deleted": False,
+-                        "tags": [],
+-                        "owner_id": test_user.id,
+-                        "created_date": get_iso_date(),
+-                    }
+-                ]
+-            return []
+-
+-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
+-
+-        response = test_app.get("/notes/?search=test&completed=true")
++        response = test_app.get(
++            "/notes/?search=test&completed=true", headers=token_headers
++        )
+         assert response.status_code == 200
+-        assert len(response.json()) == 1
++        assert len(response.get_json()) == 1
++
++    def test_notes_are_scoped_to_owner(
++        self, test_app, token_headers, second_token_headers
++    ):
++        """A user must not see or fetch another user's notes"""
++        mine = _create(test_app, token_headers, title="private note").get_json()
++
++        assert test_app.get("/notes/", headers=second_token_headers).get_json() == []
++        response = test_app.get(
++            f"/notes/{mine['id']}", headers=second_token_headers
++        )
++        assert response.status_code == 404
+ 
+ 
+ class TestUpdateNote:
+     """Tests for updating notes"""
+ 
+-    def test_update_note_success(self, test_app, monkeypatch, test_user):
++    def test_update_note_success(self, test_app, token_headers):
+         """Test successful note update"""
+-        test_update_data = {
+-            "title": "updated title",
+-            "description": "updated description",
+-            "completed": True,
+-            "tags": ["personal"],
+-        }
+-        test_response = {
+-            "id": 1,
++        created = _create(test_app, token_headers).get_json()
++        update = {
+             "title": "updated title",
+             "description": "updated description",
+             "completed": True,
+-            "is_deleted": False,
+             "tags": ["personal"],
+-            "owner_id": test_user.id,
+-            "created_date": get_iso_date(),
+         }
+ 
+-        async def mock_get(session, id):
+-            return test_response if id == 1 else None
+-
+-        async def mock_put(session, id, payload):
+-            return 1
+-
+-        monkeypatch.setattr(crud, "get", mock_get)
+-        monkeypatch.setattr(crud, "put", mock_put)
+-
+-        response = test_app.put("/notes/1", json=test_update_data)
++        response = test_app.put(
++            f"/notes/{created['id']}", json=update, headers=token_headers
++        )
+         assert response.status_code == 200
+-        assert response.json() == test_response
+-
+-    def test_update_note_not_found(self, test_app, monkeypatch):
+-        """Test updating non-existent note returns 404"""
+-
+-        async def mock_get(session, id):
+-            return None
+ 
+-        monkeypatch.setattr(crud, "get", mock_get)
++        body = response.get_json()
++        assert body["title"] == "updated title"
++        assert body["description"] == "updated description"
++        assert body["completed"] is True
++        assert body["tags"] == ["personal"]
++        assert body["id"] == created["id"]
+ 
++    def test_update_note_not_found(self, test_app, token_headers):
++        """Test updating non-existent note returns 404"""
+         response = test_app.put(
+-            "/notes/999", json={"title": "foo", "description": "bar"}
++            "/notes/999",
++            json={"title": "foo", "description": "bar"},
++            headers=token_headers,
+         )
+         assert response.status_code == 404
+ 
+@@ -360,93 +242,61 @@ class TestUpdateNote:
+         ],
+     )
+     def test_update_note_validation(
+-        self, test_app, monkeypatch, test_user, id, payload, expected_status
++        self, test_app, token_headers, id, payload, expected_status
+     ):
+         """Test note update with invalid data"""
++        existing = _create(test_app, token_headers).get_json()
++        target = existing["id"] if id == 1 else id
+ 
+-        async def mock_get(session, note_id):
+-            return (
+-                None
+-                if note_id == 999 or note_id <= 0
+-                else {
+-                    "id": note_id,
+-                    "title": "existing",
+-                    "description": "existing",
+-                    "completed": False,
+-                    "is_deleted": False,
+-                    "tags": [],
+-                    "owner_id": test_user.id,
+-                    "created_date": get_iso_date(),
+-                }
+-            )
+-
+-        monkeypatch.setattr(crud, "get", mock_get)
+-
+-        response = test_app.put(f"/notes/{id}", json=payload)
++        response = test_app.put(
++            f"/notes/{target}", json=payload, headers=token_headers
++        )
+         assert response.status_code == expected_status
+ 
+ 
+ class TestDeleteNote:
+     """Tests for deleting notes"""
+ 
+-    def test_delete_note_success(self, test_app, monkeypatch, test_user):
++    def test_delete_note_success(self, test_app, token_headers):
+         """Test successful note deletion"""
+-        test_data = {
+-            "title": "something",
+-            "description": "something else",
+-            "id": 1,
+-            "completed": False,
+-            "is_deleted": False,
+-            "tags": [],
+-            "owner_id": test_user.id,
+-            "created_date": get_iso_date(),
+-        }
+-
+-        async def mock_get(session, id):
+-            return test_data if id == 1 else None
++        created = _create(test_app, token_headers).get_json()
+ 
+-        async def mock_delete_note(session, id):
+-            return 1
+-
+-        monkeypatch.setattr(crud, "get", mock_get)
+-        monkeypatch.setattr(crud, "delete_note", mock_delete_note)
+-
+-        response = test_app.delete("/notes/1")
++        response = test_app.delete(f"/notes/{created['id']}", headers=token_headers)
+         assert response.status_code == 200
+-        assert response.json() == test_data
++        assert response.get_json() == created
+ 
+-    def test_delete_note_not_found(self, test_app, monkeypatch):
++    def test_delete_note_not_found(self, test_app, token_headers):
+         """Test deleting non-existent note returns 404"""
+-
+-        async def mock_get(session, id):
+-            return None
+-
+-        monkeypatch.setattr(crud, "get", mock_get)
+-
+-        response = test_app.delete("/notes/999")
++        response = test_app.delete("/notes/999", headers=token_headers)
+         assert response.status_code == 404
+-        assert "not found" in response.json()["detail"].lower()
++        assert "not found" in response.get_json()["detail"].lower()
+ 
+-    def test_delete_note_invalid_id(self, test_app, monkeypatch):
++    def test_delete_note_invalid_id(self, test_app, token_headers):
+         """Test deleting with invalid ID"""
+-        response = test_app.delete("/notes/0")
+-        assert response.status_code == 422
+-
+-        response = test_app.delete("/notes/invalid")
+-        assert response.status_code == 422
++        assert test_app.delete("/notes/0", headers=token_headers).status_code == 422
++        assert (
++            test_app.delete("/notes/invalid", headers=token_headers).status_code == 422
++        )
+ 
+-    def test_delete_note_already_deleted(self, test_app, monkeypatch):
++    def test_delete_note_already_deleted(self, test_app, token_headers):
+         """Test that already soft-deleted note cannot be deleted again (regression)"""
++        created = _create(test_app, token_headers).get_json()
++        assert (
++            test_app.delete(f"/notes/{created['id']}", headers=token_headers).status_code
++            == 200
++        )
+ 
+-        async def mock_get(session, id):
+-            return None
+-
+-        async def mock_delete_note(session, id):
+-            return 0
++        response = test_app.delete(f"/notes/{created['id']}", headers=token_headers)
++        assert response.status_code == 404
++        assert "not found" in response.get_json()["detail"].lower()
+ 
+-        monkeypatch.setattr(crud, "get", mock_get)
+-        monkeypatch.setattr(crud, "delete_note", mock_delete_note)
++    def test_deleted_note_is_hidden(self, test_app, token_headers):
++        """Soft-deleted notes disappear from reads and listings"""
++        created = _create(test_app, token_headers).get_json()
++        test_app.delete(f"/notes/{created['id']}", headers=token_headers)
+ 
+-        response = test_app.delete("/notes/1")
+-        assert response.status_code == 404
+-        assert "not found" in response.json()["detail"].lower()
++        assert (
++            test_app.get(f"/notes/{created['id']}", headers=token_headers).status_code
++            == 404
++        )
++        assert test_app.get("/notes/", headers=token_headers).get_json() == []
+diff --git a/src/tests/test_ping.py b/src/tests/test_ping.py
+index 2b000aa..59cf6b8 100755
+--- a/src/tests/test_ping.py
++++ b/src/tests/test_ping.py
+@@ -7,7 +7,7 @@ def test_ping_success(test_app):
+     """Test successful health check response"""
+     response = test_app.get("/ping")
+     assert response.status_code == 200
+-    data = response.json()
++    data = response.get_json()
+     assert "status" in data
+     assert "message" in data
+     assert data["status"] in ["healthy", "degraded"]
+@@ -17,7 +17,7 @@ def test_ping_response_schema(test_app):
+     """Test that ping response matches expected schema"""
+     response = test_app.get("/ping")
+     assert response.status_code == 200
+-    data = response.json()
++    data = response.get_json()
+ 
+     # Verify response has required fields
+     assert isinstance(data["status"], str)

@@ -31,7 +31,7 @@ Steps to reproduce:
 Expected: Note should be created successfully
 Actual: 500 Error returned
 
-Environment: Python 3.13, PostgreSQL 14, FastAPI 0.115.8
+Environment: Python 3.13, PostgreSQL 14, Flask 3.1.2
 ```
 
 ### Suggesting Enhancements

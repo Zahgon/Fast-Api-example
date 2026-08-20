@@ -7,7 +7,7 @@ def test_ping_success(test_app):
     """Test successful health check response"""
     response = test_app.get("/ping")
     assert response.status_code == 200
-    data = response.json()
+    data = response.get_json()
     assert "status" in data
     assert "message" in data
     assert data["status"] in ["healthy", "degraded"]
@@ -17,7 +17,7 @@ def test_ping_response_schema(test_app):
     """Test that ping response matches expected schema"""
     response = test_app.get("/ping")
     assert response.status_code == 200
-    data = response.json()
+    data = response.get_json()
 
     # Verify response has required fields
     assert isinstance(data["status"], str)

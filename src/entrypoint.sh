@@ -8,5 +8,5 @@ echo "Running database migrations..."
 alembic upgrade head
 
 # Start application
-echo "Starting FastAPI application..."
+echo "Starting Flask application..."
 exec "$@"

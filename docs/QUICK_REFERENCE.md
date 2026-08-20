@@ -189,7 +189,7 @@ mypy src/app
 ```
 src/
 ├── app/
-│   ├── main.py           # FastAPI app
+│   ├── main.py           # Flask app
 │   ├── db.py             # Database config
 │   ├── .env-example      # Env template
 │   └── api/
@@ -223,7 +223,7 @@ ALLOWED_ORIGINS=http://localhost,http://localhost:5173
 
 | File | Purpose |
 |------|---------|
-| `src/app/main.py` | FastAPI app initialization |
+| `src/app/main.py` | Flask app initialization |
 | `src/app/db.py` | Database config & schema |
 | `src/app/api/models.py` | Data models & validation |
 | `src/app/api/crud.py` | Database operations |
@@ -305,7 +305,7 @@ docker-compose exec db psql -U hello_fastapi -d fast_api_dev
 - [API Documentation](API.md)
 - [Development Guide](DEVELOPMENT.md)
 - [Contributing Guide](CONTRIBUTING.md)
-- [FastAPI Docs](https://fastapi.tiangolo.com/)
+- [Flask Docs](https://flask.palletsprojects.com/)
 - [Pydantic Docs](https://docs.pydantic.dev/)
 - [SQLAlchemy Docs](https://docs.sqlalchemy.org/)
 - [PostgreSQL Docs](https://www.postgresql.org/docs/)
@@ -314,8 +314,8 @@ docker-compose exec db psql -U hello_fastapi -d fast_api_dev
 
 | Service | Port | URL |
 |---------|------|-----|
-| FastAPI | 8000 | http://localhost:8000 |
-| FastAPI (Docker) | 8002 | http://localhost:8002 |
+| Flask | 8000 | http://localhost:8000 |
+| Flask (Docker) | 8002 | http://localhost:8002 |
 | PostgreSQL | 5432 | localhost:5432 |
 | Vue Frontend | 5173 | http://localhost:5173 |
 

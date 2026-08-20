@@ -1,48 +1,43 @@
+from flask import Blueprint, jsonify
+
 from app.api import crud
-from app.api.models import NoteDB, NoteSchema, ErrorResponse, UserDB
-from app.api.dependencies import get_current_active_user
-from app.db import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, HTTPException, Path, Query, Depends
-from typing import List, Optional
-
-router = APIRouter()
-
-
-@router.post(
-    "/",
-    response_model=NoteDB,
-    status_code=201,
-    responses={400: {"model": ErrorResponse}},
+from app.api.dependencies import auth_required, current_user
+from app.api.errors import HTTPExc
+from app.api.models import NoteDB, NoteSchema
+from app.api.validation import (
+    collect,
+    validate_body,
+    validate_notes_query,
+    validate_path_id,
 )
-async def create_note(
-    payload: NoteSchema,
-    session: AsyncSession = Depends(get_db),
-    current_user: UserDB = Depends(get_current_active_user),
-):
+from app.db import get_db
+
+bp = Blueprint("notes", __name__)
+
+
+def _serialize(note: dict):
+    return NoteDB(**note).model_dump(mode="json")
+
+
+@bp.post("/")
+@auth_required
+def create_note():
     """Create a new note"""
+    payload = validate_body(NoteSchema)
+    session = get_db()
     try:
-        note_id = await crud.post(session, payload, owner_id=current_user.id)
-        response = await crud.get(session, note_id)
-        return response
+        note_id = crud.post(session, payload, owner_id=current_user().id)
+        response = crud.get(session, note_id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to create note: {str(e)}")
+        raise HTTPExc(400, f"Failed to create note: {str(e)}")
+    result = jsonify(_serialize(response))
+    result.status_code = 201
+    return result
 
 
-@router.get("/", response_model=List[NoteDB], responses={400: {"model": ErrorResponse}})
-async def read_notes(
-    skip: int = Query(0, ge=0, description="Number of items to skip"),
-    limit: int = Query(
-        10, ge=1, le=100, description="Maximum number of items to return"
-    ),
-    search: Optional[str] = Query(
-        None, max_length=100, description="Search term for title/description"
-    ),
-    completed: Optional[bool] = Query(None, description="Filter by completion status"),
-    tag: Optional[str] = Query(None, description="Filter by tag"),
-    session: AsyncSession = Depends(get_db),
-    current_user: UserDB = Depends(get_current_active_user),
-):
+@bp.get("/")
+@auth_required
+def read_notes():
     """
     Retrieve notes with optional filtering and pagination.
 
@@ -52,89 +47,76 @@ async def read_notes(
     - **completed**: Filter by completion status (true/false)
     - **tag**: Filter notes that contain this specific tag
     """
+    query = validate_notes_query()
+    session = get_db()
     try:
-        return await crud.get_notes(
+        rows = crud.get_notes(
             session,
-            owner_id=current_user.id,
-            skip=skip,
-            limit=limit,
-            search=search,
-            completed=completed,
-            tag=tag,
+            owner_id=current_user().id,
+            skip=query.skip,
+            limit=query.limit,
+            search=query.search,
+            completed=query.completed,
+            tag=query.tag,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Failed to retrieve notes: {str(e)}"
-        )
+        raise HTTPExc(400, f"Failed to retrieve notes: {str(e)}")
+    return jsonify([_serialize(row) for row in rows])
 
 
-@router.get(
-    "/{id}",
-    response_model=NoteDB,
-    responses={404: {"model": ErrorResponse}, 422: {"description": "Invalid note ID"}},
-)
-async def read_note(
-    id: int = Path(..., gt=0, description="Note ID"),
-    session: AsyncSession = Depends(get_db),
-    current_user: UserDB = Depends(get_current_active_user),
-):
+@bp.get("/<id>")
+@auth_required
+def read_note(id):
     """Retrieve a specific note by ID"""
+    note_id = validate_path_id(id)
+    session = get_db()
     try:
-        note = await crud.get(session, id)
-        if not note or note["owner_id"] != current_user.id:
-            raise HTTPException(status_code=404, detail=f"Note with id {id} not found")
-        return note
-    except HTTPException:
+        note = crud.get(session, note_id)
+        if not note or note["owner_id"] != current_user().id:
+            raise HTTPExc(404, f"Note with id {note_id} not found")
+        return jsonify(_serialize(note))
+    except HTTPExc:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Failed to retrieve note: {str(e)}"
-        )
+        raise HTTPExc(400, f"Failed to retrieve note: {str(e)}")
 
 
-@router.put(
-    "/{id}",
-    response_model=NoteDB,
-    responses={404: {"model": ErrorResponse}, 422: {"description": "Invalid note ID"}},
-)
-async def update_note(
-    id: int = Path(..., gt=0, description="Note ID"),
-    payload: NoteSchema = None,
-    session: AsyncSession = Depends(get_db),
-    current_user: UserDB = Depends(get_current_active_user),
-):
+@bp.put("/<id>")
+@auth_required
+def update_note(id):
     """Update an existing note"""
+    # FastAPI reports path and body failures together, so accumulate both.
+    note_id, payload = collect(
+        lambda: validate_path_id(id),
+        lambda: validate_body(NoteSchema),
+    )
+    session = get_db()
     try:
-        note = await crud.get(session, id)
-        if not note or note["owner_id"] != current_user.id:
-            raise HTTPException(status_code=404, detail=f"Note with id {id} not found")
-        await crud.put(session, id, payload)
-        response = await crud.get(session, id)
-        return response
-    except HTTPException:
+        note = crud.get(session, note_id)
+        if not note or note["owner_id"] != current_user().id:
+            raise HTTPExc(404, f"Note with id {note_id} not found")
+        crud.put(session, note_id, payload)
+        response = crud.get(session, note_id)
+        return jsonify(_serialize(response))
+    except HTTPExc:
         raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to update note: {str(e)}")
+        raise HTTPExc(400, f"Failed to update note: {str(e)}")
 
 
-@router.delete(
-    "/{id}",
-    response_model=NoteDB,
-    responses={404: {"model": ErrorResponse}, 422: {"description": "Invalid note ID"}},
-)
-async def delete_note(
-    id: int = Path(..., gt=0, description="Note ID"),
-    session: AsyncSession = Depends(get_db),
-    current_user: UserDB = Depends(get_current_active_user),
-):
+@bp.delete("/<id>")
+@auth_required
+def delete_note(id):
     """Delete a note by ID"""
+    note_id = validate_path_id(id)
+    session = get_db()
     try:
-        note = await crud.get(session, id)
-        if not note or note["owner_id"] != current_user.id:
-            raise HTTPException(status_code=404, detail=f"Note with id {id} not found")
-        await crud.delete_note(session, id)
-        return note
-    except HTTPException:
+        note = crud.get(session, note_id)
+        if not note or note["owner_id"] != current_user().id:
+            raise HTTPExc(404, f"Note with id {note_id} not found")
+        crud.delete_note(session, note_id)
+        return jsonify(_serialize(note))
+    except HTTPExc:
         raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to delete note: {str(e)}")
+        raise HTTPExc(400, f"Failed to delete note: {str(e)}")

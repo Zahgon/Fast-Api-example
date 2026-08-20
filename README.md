@@ -1,17 +1,17 @@
-# FastAPI Example App
+# Flask Example App
 
-![fastapi-0.135.3](https://img.shields.io/badge/fastapi-0.135.3-009688?logo=fastapi&logoColor=white) ![python-3.13](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white) [![CodeQL](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml) [![Docker Compose Actions Workflow](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml)
+![flask-3.1.2](https://img.shields.io/badge/flask-3.1.2-000000?logo=flask&logoColor=white) ![python-3.13](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white) [![CodeQL](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/codeql.yml) [![Docker Compose Actions Workflow](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml/badge.svg)](https://github.com/KenMwaura1/Fast-Api-example/actions/workflows/docker-image.yml)
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kenmwaura1)
 [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label=Follow&on)](https://twitter.com/Ken_Mwaura1)
 
-A production-ready asynchronous REST API built with [FastAPI](https://fastapi.tiangolo.com/), featuring secure user authentication and advanced notes management. The application uses modern patterns like native SQLAlchemy 2.0 Async, Pydantic 2 settings, and is fully containerized.
+A production-ready REST API built with [Flask](https://flask.palletsprojects.com/), featuring secure user authentication and advanced notes management. The application uses modern patterns like SQLAlchemy 2.0, Pydantic 2 settings and validation, and is fully containerized.
 
 ## ✨ Features
 
-- 🚀 **Asynchronous API** - Built with FastAPI 0.135.3 and async/await patterns
+- 🚀 **REST API** - Built with Flask 3.1.2 and blueprint-based routing
 - 🔐 **Secure Authentication** - JWT-based OAuth2 Password Grant flow
-- 🐘 **PostgreSQL Database** - Native SQLAlchemy 2.0 Async with asyncpg
+- 🐘 **PostgreSQL Database** - SQLAlchemy 2.0 Core with psycopg2
 - 📦 **Database Migrations** - Managed by Alembic
 - 🔍 **Search & Filter** - Support for text search, completion status, and tags
 - 🏷️ **Tags Support** - Organize notes with flexible tagging
@@ -105,7 +105,7 @@ This `docker build` command sets the build context to `src` so the `COPY require
    Configure your DATABASE_URL in `src/.env` (copy from `src/app/.env-example`):
 
    ```env
-   DATABASE_URL=postgresql+asyncpg://user:password@localhost/dbname
+   DATABASE_URL=postgresql://user:password@localhost/dbname
    SECRET_KEY=your-secret-key
    ```
 
@@ -185,7 +185,7 @@ Fast-Api-example/
 │   │   │   └── models.py # Pydantic models
 │   │   ├── config.py     # Pydantic Settings
 │   │   ├── db.py         # SQLAlchemy Setup
-│   │   └── main.py       # FastAPI Entry
+│   │   └── main.py       # Flask Entry
 │   ├── migrations/       # Alembic migrations
 │   └── tests/            # Test suite
 ├── vue-client/           # Vue 3 frontend
@@ -200,7 +200,7 @@ If you see "relation 'notes' already exists", ensure you have run `alembic upgra
 
 ### Connection Refused
 
-If the backend can't connect to the DB in Docker, verify the `DATABASE_URL` uses `db` as the hostname: `postgresql+asyncpg://user:pass@db/dbname`.
+If the backend can't connect to the DB in Docker, verify the `DATABASE_URL` uses `db` as the hostname: `postgresql://user:pass@db/dbname`.
 
 ### Frontend API URL
 
@@ -218,4 +218,4 @@ This project is licensed under the [MIT License](LICENSE).
 - GitHub: [@KenMwaura1](https://github.com/KenMwaura1)
 
 ---
-**Built with ❤️ using FastAPI and Vue.js**
+**Built with ❤️ using Flask and Vue.js**

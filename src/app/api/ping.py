@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from flask import Blueprint, jsonify
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+
 from app.db import get_db
 
-router = APIRouter()
+bp = Blueprint("ping", __name__)
 
 
 class PingResponse(BaseModel):
@@ -14,29 +14,29 @@ class PingResponse(BaseModel):
     message: str
 
 
-@router.get(
-    "/ping",
-    response_model=PingResponse,
-    tags=["health"],
-    summary="Health check endpoint",
-)
-async def pong(session: AsyncSession = Depends(get_db)):
+@bp.get("/ping")
+def pong():
     """
     Health check endpoint to verify API and database connectivity.
 
     Returns the current status of the API and database connection.
     """
+    session = get_db()
     try:
         # Verify database connection by executing a simple query
-        await session.execute(text("SELECT 1"))
+        session.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception:
+        session.rollback()
         db_status = "disconnected"
 
     if db_status == "disconnected":
-        return PingResponse(
+        payload = PingResponse(
             status="degraded",
             message="API is running but database connection is unavailable",
         )
-
-    return PingResponse(status="healthy", message="API and database are operational")
+    else:
+        payload = PingResponse(
+            status="healthy", message="API and database are operational"
+        )
+    return jsonify(payload.model_dump(mode="json"))

@@ -3,49 +3,64 @@ Comprehensive tests for the Notes API endpoints
 """
 
 import pytest
-from datetime import datetime
-from app.api import crud
 
 
-def get_iso_date():
-    """Generate current ISO format date"""
-    return datetime.now().isoformat()
+def _create(client, headers, **overrides):
+    payload = {
+        "title": "something",
+        "description": "something else",
+        "completed": False,
+        "tags": [],
+    }
+    payload.update(overrides)
+    return client.post("/notes/", json=payload, headers=headers)
+
+
+class TestAuthorization:
+    """Every notes route is behind the bearer token"""
+
+    @pytest.mark.parametrize(
+        "method, path",
+        [
+            ("get", "/notes/"),
+            ("post", "/notes/"),
+            ("get", "/notes/1"),
+            ("put", "/notes/1"),
+            ("delete", "/notes/1"),
+        ],
+    )
+    def test_requires_token(self, test_app, method, path):
+        response = getattr(test_app, method)(path)
+        assert response.status_code == 401
+        assert response.get_json()["detail"] == "Not authenticated"
+        assert response.headers.get("WWW-Authenticate") == "Bearer"
+
+    def test_rejects_bad_token(self, test_app):
+        response = test_app.get(
+            "/notes/", headers={"Authorization": "Bearer not.a.real.token"}
+        )
+        assert response.status_code == 401
+        assert response.get_json()["detail"] == "Could not validate credentials"
 
 
 class TestCreateNote:
     """Tests for creating notes"""
 
-    def test_create_note_success(self, test_app, monkeypatch, test_user):
+    def test_create_note_success(self, test_app, token_headers):
         """Test successful note creation"""
-        test_request_payload = {
-            "title": "something",
-            "description": "something else",
-            "completed": False,
-            "tags": ["work"],
-        }
-        test_response_payload = {
-            "id": 1,
-            "title": "something",
-            "description": "something else",
-            "completed": False,
-            "is_deleted": False,
-            "tags": ["work"],
-            "owner_id": test_user.id,
-            "created_date": get_iso_date(),
-        }
-
-        async def mock_post(session, payload, owner_id):
-            return 1
-
-        async def mock_get(session, id):
-            return test_response_payload
-
-        monkeypatch.setattr(crud, "post", mock_post)
-        monkeypatch.setattr(crud, "get", mock_get)
-
-        response = test_app.post("/notes/", json=test_request_payload)
+        response = _create(
+            test_app, token_headers, title="something", tags=["work"]
+        )
         assert response.status_code == 201
-        assert response.json() == test_response_payload
+
+        body = response.get_json()
+        assert body["title"] == "something"
+        assert body["description"] == "something else"
+        assert body["completed"] is False
+        assert body["is_deleted"] is False
+        assert body["tags"] == ["work"]
+        assert body["id"] > 0
+        assert "created_date" in body and "owner_id" in body
 
     @pytest.mark.parametrize(
         "test_payload, expected_status",
@@ -65,284 +80,151 @@ class TestCreateNote:
         ],
     )
     def test_create_note_validation(
-        self, test_app, monkeypatch, test_user, test_payload, expected_status
+        self, test_app, token_headers, test_payload, expected_status
     ):
         """Test note creation with invalid payloads"""
-
-        async def mock_post(session, payload, owner_id):
-            return 1
-
-        async def mock_get(session, id):
-            return {
-                "id": 1,
-                "title": test_payload.get("title", ""),
-                "description": test_payload.get("description", ""),
-                "completed": test_payload.get("completed", False),
-                "is_deleted": False,
-                "tags": test_payload.get("tags", []),
-                "owner_id": test_user.id,
-                "created_date": get_iso_date(),
-            }
-
-        monkeypatch.setattr(crud, "post", mock_post)
-        monkeypatch.setattr(crud, "get", mock_get)
-
-        response = test_app.post("/notes/", json=test_payload)
+        response = test_app.post("/notes/", json=test_payload, headers=token_headers)
         assert response.status_code == expected_status
 
 
 class TestReadNotes:
     """Tests for reading notes"""
 
-    def test_read_single_note(self, test_app, monkeypatch, test_user):
+    def test_read_single_note(self, test_app, token_headers):
         """Test reading a single note by ID"""
-        test_data = {
-            "title": "something",
-            "description": "something else",
-            "id": 1,
-            "completed": False,
-            "is_deleted": False,
-            "tags": [],
-            "owner_id": test_user.id,
-            "created_date": get_iso_date(),
-        }
+        created = _create(test_app, token_headers).get_json()
 
-        async def mock_get(session, id):
-            return test_data
-
-        monkeypatch.setattr(crud, "get", mock_get)
-
-        response = test_app.get("/notes/1")
+        response = test_app.get(f"/notes/{created['id']}", headers=token_headers)
         assert response.status_code == 200
-        assert response.json() == test_data
+        assert response.get_json() == created
 
-    def test_read_note_not_found(self, test_app, monkeypatch):
+    def test_read_note_not_found(self, test_app, token_headers):
         """Test reading non-existent note returns 404"""
-
-        async def mock_get(session, id):
-            return None
-
-        monkeypatch.setattr(crud, "get", mock_get)
-
-        response = test_app.get("/notes/999")
+        response = test_app.get("/notes/999", headers=token_headers)
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        assert "not found" in response.get_json()["detail"].lower()
 
-    def test_read_note_invalid_id(self, test_app, monkeypatch):
+    def test_read_note_invalid_id(self, test_app, token_headers):
         """Test reading note with invalid ID"""
-        response = test_app.get("/notes/0")
-        assert response.status_code == 422
+        assert test_app.get("/notes/0", headers=token_headers).status_code == 422
+        assert test_app.get("/notes/invalid", headers=token_headers).status_code == 422
 
-        response = test_app.get("/notes/invalid")
-        assert response.status_code == 422
-
-    def test_read_all_notes(self, test_app, monkeypatch, test_user):
+    def test_read_all_notes(self, test_app, token_headers):
         """Test reading all notes with default pagination"""
-        test_data = [
-            {
-                "title": "note 1",
-                "description": "desc 1",
-                "id": 1,
-                "completed": False,
-                "is_deleted": False,
-                "tags": ["work"],
-                "owner_id": test_user.id,
-                "created_date": get_iso_date(),
-            },
-            {
-                "title": "note 2",
-                "description": "desc 2",
-                "id": 2,
-                "completed": False,
-                "is_deleted": False,
-                "tags": [],
-                "owner_id": test_user.id,
-                "created_date": get_iso_date(),
-            },
-        ]
+        _create(test_app, token_headers, title="note 1", description="desc 1",
+                tags=["work"])
+        _create(test_app, token_headers, title="note 2", description="desc 2")
 
-        async def mock_get_notes(
-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
-        ):
-            return test_data
-
-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
-
-        response = test_app.get("/notes/")
+        response = test_app.get("/notes/", headers=token_headers)
         assert response.status_code == 200
-        assert len(response.json()) == 2
-        assert response.json() == test_data
+        assert len(response.get_json()) == 2
 
-    def test_read_notes_with_pagination(self, test_app, monkeypatch, test_user):
+    def test_read_notes_with_pagination(self, test_app, token_headers):
         """Test note pagination with skip and limit"""
-        test_data = [
-            {
-                "title": "note 1",
-                "description": "desc 1",
-                "id": 1,
-                "completed": False,
-                "is_deleted": False,
-                "tags": [],
-                "owner_id": test_user.id,
-                "created_date": get_iso_date(),
-            }
-        ]
+        _create(test_app, token_headers, title="note 1", description="desc 1")
+        _create(test_app, token_headers, title="note 2", description="desc 2")
 
-        async def mock_get_notes(
-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
-        ):
-            return test_data if skip == 0 and limit == 1 else []
-
-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
-
-        response = test_app.get("/notes/?skip=0&limit=1")
+        response = test_app.get("/notes/?skip=0&limit=1", headers=token_headers)
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.get_json()) == 1
 
-    def test_read_notes_pagination_invalid_limit(self, test_app, monkeypatch):
+    def test_read_notes_pagination_invalid_limit(self, test_app, token_headers):
         """Test that limit exceeding maximum is rejected"""
+        assert (
+            test_app.get("/notes/?limit=101", headers=token_headers).status_code == 422
+        )
+        assert test_app.get("/notes/?limit=0", headers=token_headers).status_code == 422
+        assert test_app.get("/notes/?skip=-1", headers=token_headers).status_code == 422
 
-        async def mock_get_notes(
-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
-        ):
-            return []
-
-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
-
-        response = test_app.get("/notes/?limit=101")
-        assert response.status_code == 422
-
-    def test_read_notes_filter_by_completion(self, test_app, monkeypatch, test_user):
+    def test_read_notes_filter_by_completion(self, test_app, token_headers):
         """Test filtering notes by completion status"""
-        completed_notes = [
-            {
-                "title": "note 1",
-                "description": "desc 1",
-                "id": 1,
-                "completed": True,
-                "is_deleted": False,
-                "tags": [],
-                "owner_id": test_user.id,
-                "created_date": get_iso_date(),
-            }
-        ]
+        _create(test_app, token_headers, title="done note", completed=True)
+        _create(test_app, token_headers, title="open note", completed=False)
 
-        async def mock_get_notes(
-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
-        ):
-            if completed is True:
-                return completed_notes
-            return []
-
-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
-
-        response = test_app.get("/notes/?completed=true")
+        response = test_app.get("/notes/?completed=true", headers=token_headers)
         assert response.status_code == 200
-        assert len(response.json()) == 1
-        assert response.json()[0]["completed"] is True
+        body = response.get_json()
+        assert len(body) == 1
+        assert body[0]["completed"] is True
 
-    def test_read_notes_search(self, test_app, monkeypatch, test_user):
+    def test_read_notes_search(self, test_app, token_headers):
         """Test searching notes by title/description"""
-        search_results = [
-            {
-                "title": "unique title",
-                "description": "desc 1",
-                "id": 1,
-                "completed": False,
-                "is_deleted": False,
-                "tags": [],
-                "owner_id": test_user.id,
-                "created_date": get_iso_date(),
-            }
-        ]
+        _create(test_app, token_headers, title="unique title", description="desc 1")
+        _create(test_app, token_headers, title="other title", description="desc 2")
 
-        async def mock_get_notes(
-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
-        ):
-            if search and "unique" in search:
-                return search_results
-            return []
-
-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
-
-        response = test_app.get("/notes/?search=unique")
+        response = test_app.get("/notes/?search=unique", headers=token_headers)
         assert response.status_code == 200
-        assert len(response.json()) == 1
-        assert "unique" in response.json()[0]["title"].lower()
+        body = response.get_json()
+        assert len(body) == 1
+        assert "unique" in body[0]["title"].lower()
 
-    def test_read_notes_combined_filters(self, test_app, monkeypatch, test_user):
+    def test_read_notes_filter_by_tag(self, test_app, token_headers):
+        """Test filtering notes by tag"""
+        _create(test_app, token_headers, title="tagged note", tags=["alpha"])
+        _create(test_app, token_headers, title="plain note", tags=["beta"])
+
+        response = test_app.get("/notes/?tag=alpha", headers=token_headers)
+        assert response.status_code == 200
+        assert len(response.get_json()) == 1
+        assert test_app.get(
+            "/notes/?tag=nosuchtag", headers=token_headers
+        ).get_json() == []
+
+    def test_read_notes_combined_filters(self, test_app, token_headers):
         """Test combining search and completion filters"""
+        _create(test_app, token_headers, title="test note", completed=True)
+        _create(test_app, token_headers, title="test other", completed=False)
 
-        async def mock_get_notes(
-            session, owner_id, skip=0, limit=10, search=None, completed=None, tag=None
-        ):
-            if search == "test" and completed is True:
-                return [
-                    {
-                        "title": "test note",
-                        "description": "desc",
-                        "id": 1,
-                        "completed": True,
-                        "is_deleted": False,
-                        "tags": [],
-                        "owner_id": test_user.id,
-                        "created_date": get_iso_date(),
-                    }
-                ]
-            return []
-
-        monkeypatch.setattr(crud, "get_notes", mock_get_notes)
-
-        response = test_app.get("/notes/?search=test&completed=true")
+        response = test_app.get(
+            "/notes/?search=test&completed=true", headers=token_headers
+        )
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.get_json()) == 1
+
+    def test_notes_are_scoped_to_owner(
+        self, test_app, token_headers, second_token_headers
+    ):
+        """A user must not see or fetch another user's notes"""
+        mine = _create(test_app, token_headers, title="private note").get_json()
+
+        assert test_app.get("/notes/", headers=second_token_headers).get_json() == []
+        response = test_app.get(
+            f"/notes/{mine['id']}", headers=second_token_headers
+        )
+        assert response.status_code == 404
 
 
 class TestUpdateNote:
     """Tests for updating notes"""
 
-    def test_update_note_success(self, test_app, monkeypatch, test_user):
+    def test_update_note_success(self, test_app, token_headers):
         """Test successful note update"""
-        test_update_data = {
+        created = _create(test_app, token_headers).get_json()
+        update = {
             "title": "updated title",
             "description": "updated description",
             "completed": True,
             "tags": ["personal"],
         }
-        test_response = {
-            "id": 1,
-            "title": "updated title",
-            "description": "updated description",
-            "completed": True,
-            "is_deleted": False,
-            "tags": ["personal"],
-            "owner_id": test_user.id,
-            "created_date": get_iso_date(),
-        }
-
-        async def mock_get(session, id):
-            return test_response if id == 1 else None
-
-        async def mock_put(session, id, payload):
-            return 1
-
-        monkeypatch.setattr(crud, "get", mock_get)
-        monkeypatch.setattr(crud, "put", mock_put)
-
-        response = test_app.put("/notes/1", json=test_update_data)
-        assert response.status_code == 200
-        assert response.json() == test_response
-
-    def test_update_note_not_found(self, test_app, monkeypatch):
-        """Test updating non-existent note returns 404"""
-
-        async def mock_get(session, id):
-            return None
-
-        monkeypatch.setattr(crud, "get", mock_get)
 
         response = test_app.put(
-            "/notes/999", json={"title": "foo", "description": "bar"}
+            f"/notes/{created['id']}", json=update, headers=token_headers
+        )
+        assert response.status_code == 200
+
+        body = response.get_json()
+        assert body["title"] == "updated title"
+        assert body["description"] == "updated description"
+        assert body["completed"] is True
+        assert body["tags"] == ["personal"]
+        assert body["id"] == created["id"]
+
+    def test_update_note_not_found(self, test_app, token_headers):
+        """Test updating non-existent note returns 404"""
+        response = test_app.put(
+            "/notes/999",
+            json={"title": "foo", "description": "bar"},
+            headers=token_headers,
         )
         assert response.status_code == 404
 
@@ -360,93 +242,61 @@ class TestUpdateNote:
         ],
     )
     def test_update_note_validation(
-        self, test_app, monkeypatch, test_user, id, payload, expected_status
+        self, test_app, token_headers, id, payload, expected_status
     ):
         """Test note update with invalid data"""
+        existing = _create(test_app, token_headers).get_json()
+        target = existing["id"] if id == 1 else id
 
-        async def mock_get(session, note_id):
-            return (
-                None
-                if note_id == 999 or note_id <= 0
-                else {
-                    "id": note_id,
-                    "title": "existing",
-                    "description": "existing",
-                    "completed": False,
-                    "is_deleted": False,
-                    "tags": [],
-                    "owner_id": test_user.id,
-                    "created_date": get_iso_date(),
-                }
-            )
-
-        monkeypatch.setattr(crud, "get", mock_get)
-
-        response = test_app.put(f"/notes/{id}", json=payload)
+        response = test_app.put(
+            f"/notes/{target}", json=payload, headers=token_headers
+        )
         assert response.status_code == expected_status
 
 
 class TestDeleteNote:
     """Tests for deleting notes"""
 
-    def test_delete_note_success(self, test_app, monkeypatch, test_user):
+    def test_delete_note_success(self, test_app, token_headers):
         """Test successful note deletion"""
-        test_data = {
-            "title": "something",
-            "description": "something else",
-            "id": 1,
-            "completed": False,
-            "is_deleted": False,
-            "tags": [],
-            "owner_id": test_user.id,
-            "created_date": get_iso_date(),
-        }
+        created = _create(test_app, token_headers).get_json()
 
-        async def mock_get(session, id):
-            return test_data if id == 1 else None
-
-        async def mock_delete_note(session, id):
-            return 1
-
-        monkeypatch.setattr(crud, "get", mock_get)
-        monkeypatch.setattr(crud, "delete_note", mock_delete_note)
-
-        response = test_app.delete("/notes/1")
+        response = test_app.delete(f"/notes/{created['id']}", headers=token_headers)
         assert response.status_code == 200
-        assert response.json() == test_data
+        assert response.get_json() == created
 
-    def test_delete_note_not_found(self, test_app, monkeypatch):
+    def test_delete_note_not_found(self, test_app, token_headers):
         """Test deleting non-existent note returns 404"""
-
-        async def mock_get(session, id):
-            return None
-
-        monkeypatch.setattr(crud, "get", mock_get)
-
-        response = test_app.delete("/notes/999")
+        response = test_app.delete("/notes/999", headers=token_headers)
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        assert "not found" in response.get_json()["detail"].lower()
 
-    def test_delete_note_invalid_id(self, test_app, monkeypatch):
+    def test_delete_note_invalid_id(self, test_app, token_headers):
         """Test deleting with invalid ID"""
-        response = test_app.delete("/notes/0")
-        assert response.status_code == 422
+        assert test_app.delete("/notes/0", headers=token_headers).status_code == 422
+        assert (
+            test_app.delete("/notes/invalid", headers=token_headers).status_code == 422
+        )
 
-        response = test_app.delete("/notes/invalid")
-        assert response.status_code == 422
-
-    def test_delete_note_already_deleted(self, test_app, monkeypatch):
+    def test_delete_note_already_deleted(self, test_app, token_headers):
         """Test that already soft-deleted note cannot be deleted again (regression)"""
+        created = _create(test_app, token_headers).get_json()
+        assert (
+            test_app.delete(f"/notes/{created['id']}", headers=token_headers).status_code
+            == 200
+        )
 
-        async def mock_get(session, id):
-            return None
-
-        async def mock_delete_note(session, id):
-            return 0
-
-        monkeypatch.setattr(crud, "get", mock_get)
-        monkeypatch.setattr(crud, "delete_note", mock_delete_note)
-
-        response = test_app.delete("/notes/1")
+        response = test_app.delete(f"/notes/{created['id']}", headers=token_headers)
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        assert "not found" in response.get_json()["detail"].lower()
+
+    def test_deleted_note_is_hidden(self, test_app, token_headers):
+        """Soft-deleted notes disappear from reads and listings"""
+        created = _create(test_app, token_headers).get_json()
+        test_app.delete(f"/notes/{created['id']}", headers=token_headers)
+
+        assert (
+            test_app.get(f"/notes/{created['id']}", headers=token_headers).status_code
+            == 404
+        )
+        assert test_app.get("/notes/", headers=token_headers).get_json() == []

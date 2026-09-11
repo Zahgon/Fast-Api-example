@@ -14,7 +14,8 @@ PORT=${PORT:-8000}
   fi
 
   # Run app with auto-reload for development
-  echo "Starting FastAPI application on http://$HOST:$PORT"
+  echo "Starting Flask application on http://$HOST:$PORT"
   echo "API docs available at http://$HOST:$PORT/docs"
-  uvicorn --reload --host "$HOST" --port "$PORT" "$APP_MODULE"
+  export FLASK_APP="$APP_MODULE"
+  flask --app "$APP_MODULE" run --host "$HOST" --port "$PORT" --reload
 )
